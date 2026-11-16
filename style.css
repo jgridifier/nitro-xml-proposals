@@ -45,3 +45,4 @@ figure{margin:0}figure img{border:1px solid var(--line);border-radius:12px}
 .k{color:var(--mut);font-size:14px}.v{font-size:15px}.eff{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e8f0fe;color:var(--blue-d);margin-right:6px}
 .dod{padding-left:20px;margin:0}.dod li{margin:6px 0}
 .foot{max-width:1120px;margin:20px auto 0;padding:24px 20px 40px;border-top:1px solid var(--line);font-size:14px;color:var(--mut)}
+.brand .logo{width:24px;height:24px;border-radius:6px;vertical-align:-6px;margin-right:8px}

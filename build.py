@@ -13,8 +13,11 @@ def head(title, rel):
 <title>{E(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="{rel}favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="{rel}img/favicon-32.png">
+<link rel="apple-touch-icon" href="{rel}img/apple-touch-icon.png"><link rel="manifest" href="{rel}manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
 <link rel="stylesheet" href="{rel}style.css"></head><body>
-<header class="top"><a class="brand" href="{rel}index.html"><span class="dot"></span>Nitro XML <span class="muted">Proposals</span></a>
+<header class="top"><a class="brand" href="{rel}index.html"><img class="logo" src="{rel}img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
 <a class="toplink" href="https://github.com/{REPO}">Repo</a></header>"""
 
 def badge(p):
