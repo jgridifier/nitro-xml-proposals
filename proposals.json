@@ -1,0 +1,84 @@
+{
+  "title": "Nitro XML Enhancement Proposals",
+  "repo": "jgridifier/nitro-xml",
+  "updated": "2026-11-16",
+  "editions": [
+    {
+      "date": "2026-11-16",
+      "note": "First edition: three proposals after the v0.1.0 npm release."
+    }
+  ],
+  "proposals": [
+    {
+      "id": "xlsx-status-sum",
+      "app": "Excel",
+      "added": "2026-11-16",
+      "status": "New",
+      "issue": null,
+      "headline": "See Sum, Average and Count of any selection, right in the status bar",
+      "today_img": "img/xlsx-status-today.png",
+      "today_caption": "Today: cells B2:C4 are selected, and the status bar only says \"Sheet 1 of 1\".",
+      "mock_img": "img/xlsx-status-mock.png",
+      "mock_caption": "Mockup: the same selection shows Average 7.5 · Count 6 · Sum 45 at the bottom right, like Excel.",
+      "detail_img": "img/xlsx-status-mock-detail.png",
+      "why": "In Excel, selecting a few cells instantly shows their total and average at the bottom right. It's one of the most-used glance features, and people expect it the moment they select numbers. Nitro already computes every cell value (formula values land with #534), so this is mostly a small status-bar readout.",
+      "effort": "S",
+      "effort_note": "about a day",
+      "risk": "Low. Read-only display, no file changes, so save/round-trip can't break.",
+      "perf": "About 1–2 KB in the lazily loaded Excel chunk; nothing added to the first-load loader (it has 0 B headroom). Large selections are summed on idle with a cell cap so selecting a whole column stays smooth.",
+      "dod": [
+        "Selecting 2+ cells with at least one number shows Average, Count and Sum in the status bar, formatted like the cells (e.g. currency stays currency).",
+        "Single cell or no numbers: the readout hides, like Excel.",
+        "Updates on edit, undo/redo and paste; works in Full and Embedded modes.",
+        "Playwright test for B2:C4 → Average 7.5, Count 6, Sum 45; bundle-budget and all required checks stay green."
+      ],
+      "today_detail_img": "img/xlsx-status-today-detail.png"
+    },
+    {
+      "id": "pptx-speaker-notes",
+      "app": "PowerPoint",
+      "added": "2026-11-16",
+      "status": "New",
+      "issue": null,
+      "headline": "Read and edit speaker notes under each slide",
+      "today_img": "img/pptx-notes-today.png",
+      "today_caption": "Today: no way to see a slide's speaker notes, even when the file has them.",
+      "mock_img": "img/pptx-notes-mock.png",
+      "mock_caption": "Mockup: a Notes pane under the slide plus a Notes toggle in the status bar, like PowerPoint.",
+      "why": "Speaker notes are how people prepare and present decks. Nitro already reads and keeps notes when saving, but users can't see or change them, so a deck opened in Nitro looks like it lost its script. A Notes pane with a status-bar toggle matches PowerPoint exactly.",
+      "effort": "M",
+      "effort_note": "2–4 days",
+      "risk": "Medium. Adding notes to a slide that has none must create valid notesSlide parts (and a notes master if missing) so PowerPoint opens the file without repair.",
+      "perf": "A few KB in the lazily loaded PowerPoint chunk; no change to first load. The pane takes ~130 px, so the slide re-fits above it; when the pane is closed, layout is unchanged.",
+      "dod": [
+        "Notes button in the status bar toggles a resizable pane under the slide; it shows the current slide's notes and follows slide changes.",
+        "Typing in the pane edits the notes, with grouped undo/redo.",
+        "Saved file opens in PowerPoint with the edited notes and no repair prompt, including slides that had no notes before.",
+        "Round-trip and validator checks green on fixtures with and without notes; bundle-budget green."
+      ]
+    },
+    {
+      "id": "find-replace",
+      "app": "Word · Excel · PowerPoint",
+      "added": "2026-11-16",
+      "status": "New",
+      "issue": null,
+      "headline": "Find & Replace (Ctrl+H) in the find bar, for all three apps",
+      "today_img": "img/docx-replace-today.png",
+      "today_caption": "Today: the find bar finds \"Q3\" (1 of 2) but there's no way to replace it.",
+      "mock_img": "img/docx-replace-mock.png",
+      "mock_caption": "Mockup: a Replace box with Replace, Replace all, Match case and Whole word, in the same find bar.",
+      "why": "Replace is one of the most-used editing commands in Word, Excel and PowerPoint. The Word engine already has Replace and Replace all inside it, but the find bar never shows them, and Excel and PowerPoint have no replace at all. This exposes it in one consistent bar with the Office shortcut, Ctrl+H.",
+      "effort": "M",
+      "effort_note": "Word ~1 day; Excel + PowerPoint 2–3 more",
+      "risk": "Low–medium. Replace all must be one undo step and keep formatting when a match spans styled runs; in Excel it replaces cell text only, never formula text unless asked.",
+      "perf": "The find bar lives in the first-load loader, which has 0 B headroom, so the replace row must load lazily with each app's chunk. No first-load growth; a few KB per app chunk.",
+      "dod": [
+        "Ctrl+H (and a Replace button next to Find) opens the find bar with a Replace row.",
+        "Replace and Replace all work in Word body and tables, Excel cell values, and PowerPoint shape text; the bar says \"Replaced N\".",
+        "Match case and Whole word toggles work; one Ctrl+Z undoes a whole Replace all.",
+        "Saved files validate and reopen cleanly; eager loader budget unchanged; all required checks green."
+      ]
+    }
+  ]
+}

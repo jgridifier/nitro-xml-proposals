@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Read and edit speaker notes under each slide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><span class="dot"></span>Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">PowerPoint</span><span class="badge s-new" data-status-for="">New</span><span class="muted">Added 2026-11-16</span></div>
+<h1>Read and edit speaker notes under each slide</h1>
+<p class="vote muted">Approval issue coming soon.</p>
+<div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/pptx-notes-today.png"><img src="../img/pptx-notes-today.png" alt="Today: no way to see a slide&#x27;s speaker notes, even when the file has them."></a><p class="cap">Today: no way to see a slide&#x27;s speaker notes, even when the file has them.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/pptx-notes-mock.png"><img src="../img/pptx-notes-mock.png" alt="Mockup: a Notes pane under the slide plus a Notes toggle in the status bar, like PowerPoint."></a><p class="cap">Mockup: a Notes pane under the slide plus a Notes toggle in the status bar, like PowerPoint.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Speaker notes are how people prepare and present decks. Nitro already reads and keeps notes when saving, but users can&#x27;t see or change them, so a deck opened in Nitro looks like it lost its script. A Notes pane with a status-bar toggle matches PowerPoint exactly.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">M</b> 2–4 days</span></div>
+<div><span class="k">Risk</span><span class="v">Medium. Adding notes to a slide that has none must create valid notesSlide parts (and a notes master if missing) so PowerPoint opens the file without repair.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">A few KB in the lazily loaded PowerPoint chunk; no change to first load. The pane takes ~130 px, so the slide re-fits above it; when the pane is closed, layout is unchanged.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Notes button in the status bar toggles a resizable pane under the slide; it shows the current slide&#x27;s notes and follows slide changes.</li><li>Typing in the pane edits the notes, with grouped undo/redo.</li><li>Saved file opens in PowerPoint with the edited notes and no repair prompt, including slides that had no notes before.</li><li>Round-trip and validator checks green on fixtures with and without notes; bundle-budget green.</li></ul>
+<p class="vote muted">Approval issue coming soon.</p>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>

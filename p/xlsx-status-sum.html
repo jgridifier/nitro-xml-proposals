@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>See Sum, Average and Count of any selection, right in the status bar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><span class="dot"></span>Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Excel</span><span class="badge s-new" data-status-for="">New</span><span class="muted">Added 2026-11-16</span></div>
+<h1>See Sum, Average and Count of any selection, right in the status bar</h1>
+<p class="vote muted">Approval issue coming soon.</p>
+<div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/xlsx-status-today.png"><img src="../img/xlsx-status-today.png" alt="Today: cells B2:C4 are selected, and the status bar only says &quot;Sheet 1 of 1&quot;."></a><p class="cap">Today: cells B2:C4 are selected, and the status bar only says &quot;Sheet 1 of 1&quot;.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/xlsx-status-mock.png"><img src="../img/xlsx-status-mock.png" alt="Mockup: the same selection shows Average 7.5 · Count 6 · Sum 45 at the bottom right, like Excel."></a><p class="cap">Mockup: the same selection shows Average 7.5 · Count 6 · Sum 45 at the bottom right, like Excel.</p></figure>
+</div><h3 class="sub">Close-up</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/xlsx-status-today-detail.png"><img src="../img/xlsx-status-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/xlsx-status-mock-detail.png"><img src="../img/xlsx-status-mock-detail.png" alt="Mockup close-up"></a></figure></div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">In Excel, selecting a few cells instantly shows their total and average at the bottom right. It&#x27;s one of the most-used glance features, and people expect it the moment they select numbers. Nitro already computes every cell value (formula values land with #534), so this is mostly a small status-bar readout.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">S</b> about a day</span></div>
+<div><span class="k">Risk</span><span class="v">Low. Read-only display, no file changes, so save/round-trip can&#x27;t break.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">About 1–2 KB in the lazily loaded Excel chunk; nothing added to the first-load loader (it has 0 B headroom). Large selections are summed on idle with a cell cap so selecting a whole column stays smooth.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Selecting 2+ cells with at least one number shows Average, Count and Sum in the status bar, formatted like the cells (e.g. currency stays currency).</li><li>Single cell or no numbers: the readout hides, like Excel.</li><li>Updates on edit, undo/redo and paste; works in Full and Embedded modes.</li><li>Playwright test for B2:C4 → Average 7.5, Count 6, Sum 45; bundle-budget and all required checks stay green.</li></ul>
+<p class="vote muted">Approval issue coming soon.</p>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>
