@@ -39,7 +39,7 @@ Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b
 
 def card(p):
     return f"""<article class="card"><a class="cardlink" href="p/{p['id']}.html">
-<div class="thumb"><img src="{p['mock_img']}" alt="Mockup: {E(p['headline'])}" loading="lazy"><span class="mocktag">MOCKUP</span></div>
+<div class="thumb"><img src="{p.get('thumb_img',p['mock_img'])}" alt="Mockup: {E(p['headline'])}" loading="lazy"><span class="mocktag">MOCKUP</span></div>
 <div class="cbody"><div class="meta"><span class="app">{E(p['app'])}</span>{badge(p)}<span class="effort">Effort {p['effort']}</span></div>
 <h3>{E(p['headline'])}</h3><p class="why1">{E(p['why'].split('. ')[0])}.</p></div></a>
 {vote(p)}</article>"""
@@ -54,7 +54,6 @@ def index():
 <h1>Enhancement proposals for Nitro XML</h1>
 <p class="lede">Each card is one change that brings Nitro closer to Word, Excel and PowerPoint. Look at the picture, then vote on its issue: <b>👍 to approve</b>, <b>👎 to decline</b>. About 30 seconds each.</p>
 <div class="chips">{chips}</div></section>
-<section class="feature"><a href="p/{feat['id']}.html"><img src="{feat['mock_img']}" alt="Featured mockup"><span class="mocktag">MOCKUP</span></a></section>
 <h2 class="sect">Proposals</h2>
 <section class="grid">{''.join(card(p) for p in ps)}</section>
 </main>""" + FOOT.replace("{rel}", "")
@@ -64,13 +63,14 @@ def pair(p):
     t = p.get("today_detail_img"); m = p.get("detail_img")
     det = ""
     if t and m:
-        det = f"""<h3 class="sub">Close-up</h3><div class="pair">
+        det = f"""<h3 class="sub">Close-up of the change</h3><div class="pair">
 <figure><figcaption class="lab today">TODAY</figcaption><a href="../{t}"><img src="../{t}" alt="Today close-up"></a></figure>
 <figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../{m}"><img src="../{m}" alt="Mockup close-up"></a></figure></div>"""
-    return f"""<div class="pair">
+    full_h = '<h3 class="sub">Full screen</h3>' if det else ''
+    return det + full_h + f"""<div class="pair">
 <figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../{p['today_img']}"><img src="../{p['today_img']}" alt="{E(p['today_caption'])}"></a><p class="cap">{E(p['today_caption'])}</p></figure>
 <figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../{p['mock_img']}"><img src="../{p['mock_img']}" alt="{E(p['mock_caption'])}"></a><p class="cap">{E(p['mock_caption'])}</p></figure>
-</div>{det}<p class="hint">Tap an image to open it full size.</p>"""
+</div><p class="hint">Tap an image to open it full size.</p>"""
 
 def detail(p):
     dod = "".join(f"<li>{E(x)}</li>" for x in p["dod"])

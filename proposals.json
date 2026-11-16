@@ -32,7 +32,8 @@
         "Updates on edit, undo/redo and paste; works in Full and Embedded modes.",
         "Playwright test for B2:C4 → Average 7.5, Count 6, Sum 45; bundle-budget and all required checks stay green."
       ],
-      "today_detail_img": "img/xlsx-status-today-detail.png"
+      "today_detail_img": "img/xlsx-status-today-detail.png",
+      "thumb_img": "img/xlsx-status-thumb.png"
     },
     {
       "id": "pptx-speaker-notes",
@@ -55,7 +56,10 @@
         "Typing in the pane edits the notes, with grouped undo/redo.",
         "Saved file opens in PowerPoint with the edited notes and no repair prompt, including slides that had no notes before.",
         "Round-trip and validator checks green on fixtures with and without notes; bundle-budget green."
-      ]
+      ],
+      "thumb_img": "img/pptx-notes-thumb.png",
+      "today_detail_img": "img/pptx-notes-today-detail.png",
+      "detail_img": "img/pptx-notes-mock-detail.png"
     },
     {
       "id": "find-replace",
@@ -78,7 +82,10 @@
         "Replace and Replace all work in Word body and tables, Excel cell values, and PowerPoint shape text; the bar says \"Replaced N\".",
         "Match case and Whole word toggles work; one Ctrl+Z undoes a whole Replace all.",
         "Saved files validate and reopen cleanly; eager loader budget unchanged; all required checks green."
-      ]
+      ],
+      "thumb_img": "img/docx-replace-thumb.png",
+      "today_detail_img": "img/docx-replace-today-detail.png",
+      "detail_img": "img/docx-replace-mock-detail.png"
     }
   ]
 }
