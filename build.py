@@ -24,6 +24,15 @@ def badge(p):
     s = p["status"]
     return f'<span class="badge s-{s.lower()}" data-status-for="{p["issue"] or ""}">{E(s)}</span>'
 
+def note(p):
+    """One-line status note; Shipped proposals link the merged PR."""
+    pr = p.get("pr")
+    if pr:
+        return f'<p class="snote">Shipped in <a href="https://github.com/{REPO}/pull/{pr}">PR #{pr}</a>{(" · " + E(p["status_note"])) if p.get("status_note") else ""}</p>'
+    if p.get("status_note"):
+        return f'<p class="snote">{E(p["status_note"])}</p>'
+    return ""
+
 def issue_url(p):
     return f"https://github.com/{REPO}/issues/{p['issue']}" if p.get("issue") else None
 
@@ -43,12 +52,12 @@ Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b
 def card(p):
     return f"""<article class="card"><a class="cardlink" href="p/{p['id']}.html">
 <div class="thumb"><img src="{p.get('thumb_img',p['mock_img'])}" alt="Mockup: {E(p['headline'])}" loading="lazy"><span class="mocktag">MOCKUP</span></div>
-<div class="cbody"><div class="meta"><span class="app">{E(p['app'])}</span>{badge(p)}<span class="effort">Effort {p['effort']}</span></div>
+<div class="cbody"><div class="meta"><span class="app">{E(p['app'])}</span>{badge(p)}<span class="effort">Effort {p['effort']}</span><span class="added">{E(p['added'])}</span></div>
 <h3>{E(p['headline'])}</h3><p class="why1">{E(p['why'].split('. ')[0])}.</p></div></a>
-{vote(p)}</article>"""
+{note(p)}{vote(p)}</article>"""
 
 def index():
-    ps = D["proposals"]
+    ps = sorted(D["proposals"], key=lambda p: p["added"], reverse=True)
     counts = {s: sum(1 for p in ps if p["status"] == s) for s in STATUSES}
     chips = "".join(f'<span class="chip s-{s.lower()}">{s} · {counts[s]}</span>' for s in STATUSES if counts[s])
     feat = ps[0]
@@ -81,7 +90,7 @@ def detail(p):
 <p class="crumb"><a href="../index.html">← All proposals</a></p>
 <div class="meta"><span class="app">{E(p['app'])}</span>{badge(p)}<span class="muted">Added {E(p['added'])}</span></div>
 <h1>{E(p['headline'])}</h1>
-{vote(p, big=True)}
+{note(p)}{vote(p, big=True)}
 {pair(p)}
 <h2>Why</h2><p class="body">{E(p['why'])}</p>
 <div class="facts">

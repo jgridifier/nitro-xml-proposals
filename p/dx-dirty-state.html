@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tell host apps when a document has unsaved changes (nitro-dirty event, el.dirty, React onDirtyChange)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Developers · all apps</span><span class="badge s-new" data-status-for="548">New</span><span class="muted">Added 2026-11-17</span></div>
+<h1>Tell host apps when a document has unsaved changes (nitro-dirty event, el.dirty, React onDirtyChange)</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/548">Open issue #548 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/host-dirty-today-detail.png"><img src="../img/host-dirty-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/host-dirty-mock-detail.png"><img src="../img/host-dirty-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/host-dirty-today.png"><img src="../img/host-dirty-today.png" alt="Today: a host app embeds &lt;nitro-docx&gt; and the user has typed, but the app has no signal and still says &quot;Last saved 9:02 AM&quot;."></a><p class="cap">Today: a host app embeds &lt;nitro-docx&gt; and the user has typed, but the app has no signal and still says &quot;Last saved 9:02 AM&quot;.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/host-dirty-mock.png"><img src="../img/host-dirty-mock.png" alt="Mockup: the host header flips to &quot;Unsaved changes&quot; from a nitro-dirty event; the same signal drives React onDirtyChange and a before-close warning."></a><p class="cap">Mockup: the host header flips to &quot;Unsaved changes&quot; from a nitro-dirty event; the same signal drives React onDirtyChange and a before-close warning.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Apps that embed Nitro need to show &quot;Unsaved changes&quot;, autosave, and warn before the tab closes, which every Office and Google editor does. Today the only unsaved-changes signal lives inside Nitro&#x27;s own full ribbon; a host using the plain element or &lt;NitroViewer&gt; hears nothing until it calls save(), and onChange only fires on save. That tracker also works by re-saving the whole file 350 ms after each burst of typing, so an engine-side modified flag is both the missing API and a speed-up.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">M</b> 2–3 days</span></div>
+<div><span class="k">Risk</span><span class="v">Low. Additive API. The flag must return to clean when undo reaches the saved state, and after save() or opening a new file.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">Replaces the ribbon&#x27;s save-and-hash check (a full save after every edit burst) with a counter from the engine&#x27;s edit history: less CPU and memory churn on large files. Event wiring goes in the lazily loaded editor chunk; the first-load loader stays within budget.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Editable &lt;nitro-docx&gt;, &lt;nitro-xlsx&gt; and &lt;nitro-pptx&gt; expose a read-only dirty property and fire nitro-dirty (detail.dirty) only when it changes; save() and loading a file reset it; undo back to the saved state makes it clean again.</li><li>React: onDirtyChange(dirty) prop and isDirty() on the ref, with TypeScript types and a README example for autosave and a before-close warning.</li><li>Nitro&#x27;s own ribbon indicator uses the same signal (the save-and-hash probe is removed); the demo&#x27;s leave warning still works.</li><li>Tests for all three formats (edit → dirty, undo → clean, save → clean) plus the consumer-smoke example; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/548">Open issue #548 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>

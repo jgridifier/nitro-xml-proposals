@@ -1,8 +1,12 @@
 {
   "title": "Nitro XML Enhancement Proposals",
   "repo": "jgridifier/nitro-xml",
-  "updated": "2026-11-16",
+  "updated": "2026-11-17",
   "editions": [
+    {
+      "date": "2026-11-17",
+      "note": "Second edition: Word word count, Excel Freeze Panes, and an unsaved-changes API for host apps. #540 and #542 are building in tonight's nightly; #541 is queued."
+    },
     {
       "date": "2026-11-16",
       "note": "First edition: three proposals after the v0.1.0 npm release."
@@ -10,10 +14,88 @@
   ],
   "proposals": [
     {
+      "id": "docx-word-count",
+      "app": "Word",
+      "added": "2026-11-17",
+      "status": "New",
+      "issue": 546,
+      "headline": "See the word count in the status bar, with Word's Word Count box on click",
+      "today_img": "img/docx-wordcount-today.png",
+      "today_caption": "Today: the status bar only says \"Page 1 of 1\"; there is no way to see how long the document is.",
+      "mock_img": "img/docx-wordcount-mock.png",
+      "mock_caption": "Mockup: \"105 words\" sits next to the page number; clicking it opens a Word Count box (pages, words, characters, paragraphs, lines), like Word.",
+      "today_detail_img": "img/docx-wordcount-today-detail.png",
+      "detail_img": "img/docx-wordcount-mock-detail.png",
+      "thumb_img": "img/docx-wordcount-thumb.png",
+      "why": "Word shows a live word count at the bottom left of every document, and anyone writing to a length limit checks it constantly. Nitro's status bar only shows the page number, so users have to paste text elsewhere to count it. A live count next to the page number, plus the familiar Word Count box on click, matches Word exactly (Google Docs has the same under Tools > Word count).",
+      "effort": "S",
+      "effort_note": "1–2 days",
+      "risk": "Low. Read-only display; nothing is written to the file, so save and round-trip can't break.",
+      "perf": "Counting runs in Rust over paragraph text after each edit, debounced to idle, so typing stays smooth on long documents. About 1 KB in the lazily loaded Word chunk plus a small WASM addition; nothing added to the first-load loader (0 B headroom).",
+      "dod": [
+        "Status bar shows \"N words\" right after \"Page X of Y\" and updates within about 300 ms after typing, paste, delete and undo/redo.",
+        "With text selected it shows \"S of N words\", like Word.",
+        "Clicking the count opens a keyboard-accessible Word Count box (pages, words, characters with and without spaces, paragraphs, lines); Esc or Close dismisses it.",
+        "Counts match Word on notes.docx (105 words) and three corpus files; Playwright test covers count, selection and dialog; bundle-budget and all required checks green."
+      ]
+    },
+    {
+      "id": "xlsx-freeze-panes",
+      "app": "Excel",
+      "added": "2026-11-17",
+      "status": "New",
+      "issue": 547,
+      "headline": "Freeze Panes: keep header rows and label columns in view while you scroll",
+      "today_img": "img/xlsx-freeze-today.png",
+      "today_caption": "Today: after scrolling, row 1 and its labels are gone, and the View tab only has Zoom and Diagnostics.",
+      "mock_img": "img/xlsx-freeze-mock.png",
+      "mock_caption": "Mockup: View > Window > Freeze Panes menu (Freeze Panes, Freeze Top Row, Freeze First Column); row 1 stays pinned above the scrolled rows.",
+      "today_detail_img": "img/xlsx-freeze-today-detail.png",
+      "detail_img": "img/xlsx-freeze-mock-detail.png",
+      "thumb_img": "img/xlsx-freeze-thumb.png",
+      "why": "Freezing the top row is one of the first things people do in a real spreadsheet; without it, the column headings vanish as soon as you scroll. Nitro already reads, draws and saves frozen panes that come in a file, but users can't set or remove one, and the View tab has no Window group. A View > Freeze Panes menu matches Excel (Google Sheets has the same under View > Freeze).",
+      "effort": "S",
+      "effort_note": "1–2 days (drawing and saving frozen panes already exist)",
+      "risk": "Low to medium. The saved sheetView pane must be valid so Excel opens the file without a repair prompt, and clicks in the frozen area must still hit the right cells.",
+      "perf": "No first-load change; a few hundred bytes in the lazily loaded Excel ribbon. Scrolling uses the frozen-pane drawing path that files with panes already use.",
+      "dod": [
+        "View tab gets a Window group with Freeze Panes ▾ (Freeze Panes at the selected cell, Freeze Top Row, Freeze First Column); it becomes Unfreeze Panes when a freeze is set. Home tab and the 2-row Font/Paragraph groups are untouched.",
+        "Frozen rows and columns stay in view while scrolling by mouse, keyboard and scrollbars, with the freeze line drawn; selecting cells in the frozen area works.",
+        "Undo/redo work; the saved file opens in Excel with the same freeze and no repair prompt (round-trip tests with and without an existing pane).",
+        "Playwright test: Freeze Top Row, scroll 40 rows, row 1 still visible; bundle-budget and all required checks green."
+      ]
+    },
+    {
+      "id": "dx-dirty-state",
+      "app": "Developers · all apps",
+      "added": "2026-11-17",
+      "status": "New",
+      "issue": 548,
+      "headline": "Tell host apps when a document has unsaved changes (nitro-dirty event, el.dirty, React onDirtyChange)",
+      "today_img": "img/host-dirty-today.png",
+      "today_caption": "Today: a host app embeds <nitro-docx> and the user has typed, but the app has no signal and still says \"Last saved 9:02 AM\".",
+      "mock_img": "img/host-dirty-mock.png",
+      "mock_caption": "Mockup: the host header flips to \"Unsaved changes\" from a nitro-dirty event; the same signal drives React onDirtyChange and a before-close warning.",
+      "today_detail_img": "img/host-dirty-today-detail.png",
+      "detail_img": "img/host-dirty-mock-detail.png",
+      "thumb_img": "img/host-dirty-thumb.png",
+      "why": "Apps that embed Nitro need to show \"Unsaved changes\", autosave, and warn before the tab closes, which every Office and Google editor does. Today the only unsaved-changes signal lives inside Nitro's own full ribbon; a host using the plain element or <NitroViewer> hears nothing until it calls save(), and onChange only fires on save. That tracker also works by re-saving the whole file 350 ms after each burst of typing, so an engine-side modified flag is both the missing API and a speed-up.",
+      "effort": "M",
+      "effort_note": "2–3 days",
+      "risk": "Low. Additive API. The flag must return to clean when undo reaches the saved state, and after save() or opening a new file.",
+      "perf": "Replaces the ribbon's save-and-hash check (a full save after every edit burst) with a counter from the engine's edit history: less CPU and memory churn on large files. Event wiring goes in the lazily loaded editor chunk; the first-load loader stays within budget.",
+      "dod": [
+        "Editable <nitro-docx>, <nitro-xlsx> and <nitro-pptx> expose a read-only dirty property and fire nitro-dirty (detail.dirty) only when it changes; save() and loading a file reset it; undo back to the saved state makes it clean again.",
+        "React: onDirtyChange(dirty) prop and isDirty() on the ref, with TypeScript types and a README example for autosave and a before-close warning.",
+        "Nitro's own ribbon indicator uses the same signal (the save-and-hash probe is removed); the demo's leave warning still works.",
+        "Tests for all three formats (edit → dirty, undo → clean, save → clean) plus the consumer-smoke example; bundle-budget and all required checks green."
+      ]
+    },
+    {
       "id": "xlsx-status-sum",
       "app": "Excel",
       "added": "2026-11-16",
-      "status": "New",
+      "status": "Building",
       "issue": 540,
       "headline": "See Sum, Average and Count of any selection, right in the status bar",
       "today_img": "img/xlsx-status-today.png",
@@ -33,13 +115,14 @@
         "Playwright test for B2:C4 → Average 7.5, Count 6, Sum 45; bundle-budget and all required checks stay green."
       ],
       "today_detail_img": "img/xlsx-status-today-detail.png",
-      "thumb_img": "img/xlsx-status-thumb.png"
+      "thumb_img": "img/xlsx-status-thumb.png",
+      "status_note": "Building in the 2026-11-17 nightly (Claude Code); PR not opened yet."
     },
     {
       "id": "pptx-speaker-notes",
       "app": "PowerPoint",
       "added": "2026-11-16",
-      "status": "New",
+      "status": "Approved",
       "issue": 541,
       "headline": "Read and edit speaker notes under each slide",
       "today_img": "img/pptx-notes-today.png",
@@ -59,13 +142,14 @@
       ],
       "thumb_img": "img/pptx-notes-thumb.png",
       "today_detail_img": "img/pptx-notes-today-detail.png",
-      "detail_img": "img/pptx-notes-mock-detail.png"
+      "detail_img": "img/pptx-notes-mock-detail.png",
+      "status_note": "Approved 2026-11-16; queued for the next nightly."
     },
     {
       "id": "find-replace",
       "app": "Word · Excel · PowerPoint",
       "added": "2026-11-16",
-      "status": "New",
+      "status": "Building",
       "issue": 542,
       "headline": "Find & Replace (Ctrl+H) in the find bar, for all three apps",
       "today_img": "img/docx-replace-today.png",
@@ -85,7 +169,8 @@
       ],
       "thumb_img": "img/docx-replace-thumb.png",
       "today_detail_img": "img/docx-replace-today-detail.png",
-      "detail_img": "img/docx-replace-mock-detail.png"
+      "detail_img": "img/docx-replace-mock-detail.png",
+      "status_note": "Building in the 2026-11-17 nightly (Codex); PR not opened yet."
     }
   ]
 }

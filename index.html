@@ -9,24 +9,36 @@
 <link rel="stylesheet" href="style.css"></head><body>
 <header class="top"><a class="brand" href="index.html"><img class="logo" src="img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
 <a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main>
-<section class="hero"><p class="eyebrow">Edition 2026-11-16</p>
+<section class="hero"><p class="eyebrow">Edition 2026-11-17</p>
 <h1>Enhancement proposals for Nitro XML</h1>
 <p class="lede">Each card is one change that brings Nitro closer to Word, Excel and PowerPoint. Look at the picture, then vote on its issue: <b>👍 to approve</b>, <b>👎 to decline</b>. About 30 seconds each.</p>
-<div class="chips"><span class="chip s-new">New · 3</span></div></section>
+<div class="chips"><span class="chip s-new">New · 3</span><span class="chip s-approved">Approved · 1</span><span class="chip s-building">Building · 2</span></div></section>
 <h2 class="sect">Proposals</h2>
-<section class="grid"><article class="card"><a class="cardlink" href="p/xlsx-status-sum.html">
+<section class="grid"><article class="card"><a class="cardlink" href="p/docx-word-count.html">
+<div class="thumb"><img src="img/docx-wordcount-thumb.png" alt="Mockup: See the word count in the status bar, with Word&#x27;s Word Count box on click" loading="lazy"><span class="mocktag">MOCKUP</span></div>
+<div class="cbody"><div class="meta"><span class="app">Word</span><span class="badge s-new" data-status-for="546">New</span><span class="effort">Effort S</span><span class="added">2026-11-17</span></div>
+<h3>See the word count in the status bar, with Word&#x27;s Word Count box on click</h3><p class="why1">Word shows a live word count at the bottom left of every document, and anyone writing to a length limit checks it constantly.</p></div></a>
+<div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/546">Open issue #546 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article><article class="card"><a class="cardlink" href="p/xlsx-freeze-panes.html">
+<div class="thumb"><img src="img/xlsx-freeze-thumb.png" alt="Mockup: Freeze Panes: keep header rows and label columns in view while you scroll" loading="lazy"><span class="mocktag">MOCKUP</span></div>
+<div class="cbody"><div class="meta"><span class="app">Excel</span><span class="badge s-new" data-status-for="547">New</span><span class="effort">Effort S</span><span class="added">2026-11-17</span></div>
+<h3>Freeze Panes: keep header rows and label columns in view while you scroll</h3><p class="why1">Freezing the top row is one of the first things people do in a real spreadsheet; without it, the column headings vanish as soon as you scroll.</p></div></a>
+<div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/547">Open issue #547 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article><article class="card"><a class="cardlink" href="p/dx-dirty-state.html">
+<div class="thumb"><img src="img/host-dirty-thumb.png" alt="Mockup: Tell host apps when a document has unsaved changes (nitro-dirty event, el.dirty, React onDirtyChange)" loading="lazy"><span class="mocktag">MOCKUP</span></div>
+<div class="cbody"><div class="meta"><span class="app">Developers · all apps</span><span class="badge s-new" data-status-for="548">New</span><span class="effort">Effort M</span><span class="added">2026-11-17</span></div>
+<h3>Tell host apps when a document has unsaved changes (nitro-dirty event, el.dirty, React onDirtyChange)</h3><p class="why1">Apps that embed Nitro need to show &quot;Unsaved changes&quot;, autosave, and warn before the tab closes, which every Office and Google editor does.</p></div></a>
+<div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/548">Open issue #548 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article><article class="card"><a class="cardlink" href="p/xlsx-status-sum.html">
 <div class="thumb"><img src="img/xlsx-status-thumb.png" alt="Mockup: See Sum, Average and Count of any selection, right in the status bar" loading="lazy"><span class="mocktag">MOCKUP</span></div>
-<div class="cbody"><div class="meta"><span class="app">Excel</span><span class="badge s-new" data-status-for="540">New</span><span class="effort">Effort S</span></div>
+<div class="cbody"><div class="meta"><span class="app">Excel</span><span class="badge s-building" data-status-for="540">Building</span><span class="effort">Effort S</span><span class="added">2026-11-16</span></div>
 <h3>See Sum, Average and Count of any selection, right in the status bar</h3><p class="why1">In Excel, selecting a few cells instantly shows their total and average at the bottom right.</p></div></a>
-<div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/540">Open issue #540 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article><article class="card"><a class="cardlink" href="p/pptx-speaker-notes.html">
+<p class="snote">Building in the 2026-11-17 nightly (Claude Code); PR not opened yet.</p><div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/540">Open issue #540 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article><article class="card"><a class="cardlink" href="p/pptx-speaker-notes.html">
 <div class="thumb"><img src="img/pptx-notes-thumb.png" alt="Mockup: Read and edit speaker notes under each slide" loading="lazy"><span class="mocktag">MOCKUP</span></div>
-<div class="cbody"><div class="meta"><span class="app">PowerPoint</span><span class="badge s-new" data-status-for="541">New</span><span class="effort">Effort M</span></div>
+<div class="cbody"><div class="meta"><span class="app">PowerPoint</span><span class="badge s-approved" data-status-for="541">Approved</span><span class="effort">Effort M</span><span class="added">2026-11-16</span></div>
 <h3>Read and edit speaker notes under each slide</h3><p class="why1">Speaker notes are how people prepare and present decks.</p></div></a>
-<div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/541">Open issue #541 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article><article class="card"><a class="cardlink" href="p/find-replace.html">
+<p class="snote">Approved 2026-11-16; queued for the next nightly.</p><div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/541">Open issue #541 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article><article class="card"><a class="cardlink" href="p/find-replace.html">
 <div class="thumb"><img src="img/docx-replace-thumb.png" alt="Mockup: Find &amp; Replace (Ctrl+H) in the find bar, for all three apps" loading="lazy"><span class="mocktag">MOCKUP</span></div>
-<div class="cbody"><div class="meta"><span class="app">Word · Excel · PowerPoint</span><span class="badge s-new" data-status-for="542">New</span><span class="effort">Effort M</span></div>
+<div class="cbody"><div class="meta"><span class="app">Word · Excel · PowerPoint</span><span class="badge s-building" data-status-for="542">Building</span><span class="effort">Effort M</span><span class="added">2026-11-16</span></div>
 <h3>Find &amp; Replace (Ctrl+H) in the find bar, for all three apps</h3><p class="why1">Replace is one of the most-used editing commands in Word, Excel and PowerPoint.</p></div></a>
-<div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/542">Open issue #542 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article></section>
+<p class="snote">Building in the 2026-11-17 nightly (Codex); PR not opened yet.</p><div class="vote"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/542">Open issue #542 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div></article></section>
 </main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
 Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
 <p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
