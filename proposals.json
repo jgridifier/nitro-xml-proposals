@@ -116,7 +116,7 @@
       ],
       "today_detail_img": "img/xlsx-status-today-detail.png",
       "thumb_img": "img/xlsx-status-thumb.png",
-      "status_note": "Building in the 2026-11-17 nightly (Claude Code); PR not opened yet."
+      "status_note": "Building: nightly branch nightly/2026-11-17-xlsx-status-sum pushed 2026-11-17; PR not opened yet."
     },
     {
       "id": "pptx-speaker-notes",
