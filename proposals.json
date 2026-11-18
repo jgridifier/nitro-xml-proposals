@@ -1,8 +1,12 @@
 {
   "title": "Nitro XML Enhancement Proposals",
   "repo": "jgridifier/nitro-xml",
-  "updated": "2026-11-17",
+  "updated": "2026-11-18",
   "editions": [
+    {
+      "date": "2026-11-18",
+      "note": "Third edition: right-click menus, Insert link (Ctrl+K), and Print / Save as PDF. #546, #547 and #548 are approved; #540 is in draft PR #555; #542 is building."
+    },
     {
       "date": "2026-11-17",
       "note": "Second edition: Word word count, Excel Freeze Panes, and an unsaved-changes API for host apps. #540 and #542 are building in tonight's nightly; #541 is queued."
@@ -14,10 +18,91 @@
   ],
   "proposals": [
     {
+      "id": "context-menu",
+      "app": "Word · Excel · PowerPoint",
+      "added": "2026-11-18",
+      "status": "New",
+      "headline": "Right-click menus with the everyday commands, like Office",
+      "today_img": "img/context-menu-today.png",
+      "today_caption": "Today: right-clicking cell F4 does nothing; no menu appears, so Insert, Delete, Clear and Format are only on the ribbon.",
+      "mock_img": "img/context-menu-mock.png",
+      "mock_caption": "Mockup: Excel-style right-click menu (Cut, Copy, Paste Options, Insert…, Delete…, Clear Contents, Sort, Filter, Format Cells…) with the mini toolbar above it.",
+      "today_detail_img": "img/context-menu-today-detail.png",
+      "detail_img": "img/context-menu-mock-detail.png",
+      "thumb_img": "img/context-menu-thumb.png",
+      "why": "Right-click is how most people reach Cut, Copy, Paste, Insert row and Format Cells in Word, Excel and PowerPoint, and Google Docs, OnlyOffice and Collabora all copy it. In Nitro a right-click does nothing, so users who don't know the ribbon layout get stuck. The editor already has a context-menu framework and a Shift+F10 shortcut entry; they just aren't wired to right-click or filled with per-app commands.",
+      "effort": "M",
+      "effort_note": "2–3 days (menu framework exists; per-app item lists and wiring)",
+      "risk": "Low to medium. Every item must call the same command as its ribbon button, so behaviour can't drift. Right-click must first move the selection to the clicked cell, word or shape (unless it is inside the current selection), as Office does. Host apps that need the browser menu can turn it off.",
+      "perf": "No first-load change: the menu code and item lists load with each app's lazy ribbon chunk (a few KB). Nothing runs until the user right-clicks.",
+      "dod": [
+        "Right-click (and Shift+F10 / the Menu key) opens an Office-style menu at the pointer in all three apps; Esc, click-away and arrow keys work, and it is screen-reader accessible (role=menu).",
+        "Excel: Cut, Copy, Paste Options, Insert…, Delete…, Clear Contents, Sort, Filter, Format Cells…, Row Height…, Column Width…; on row/column headers: Insert, Delete, Hide, Unhide.",
+        "Word: Cut, Copy, Paste Options, Font…, Paragraph…, Link…, bullets and numbering; PowerPoint: Cut, Copy, Paste, Duplicate, Delete, Bring to Front / Send to Back on shapes, and New Slide / Duplicate / Delete on the thumbnail rail.",
+        "Right-click moves the selection to the target first; disabled items are greyed out; a contextmenu=\"browser\" attribute (and React prop) keeps the browser's own menu for hosts that want it.",
+        "Playwright tests cover one item per app plus keyboard open; bundle-budget and all required checks green."
+      ],
+      "issue": 557
+    },
+    {
+      "id": "insert-link",
+      "app": "Word · PowerPoint",
+      "added": "2026-11-18",
+      "status": "New",
+      "headline": "Insert and edit links (Ctrl+K), with a link card on hover",
+      "today_img": "img/docx-link-today.png",
+      "today_caption": "Today: the Insert tab has Page Break, Tables and Picture but no Link, and Ctrl+K does nothing (the console logs \"unsupported edit op insert.link\").",
+      "mock_img": "img/docx-link-mock.png",
+      "mock_caption": "Mockup: Insert > Links > Link (Ctrl+K) opens an Insert link box with the selected text, an address, and links to headings in the document.",
+      "today_detail_img": "img/docx-link-today-detail.png",
+      "detail_img": "img/docx-link-mock-detail.png",
+      "thumb_img": "img/docx-link-thumb.png",
+      "why": "Adding a link to selected text is a basic editing step in Word, PowerPoint, Google Docs and every web editor. Nitro already reads and displays links in files and fires a nitro-hyperlink event when one is clicked, and Ctrl+K is already bound to an insert.link command, but the command does nothing. Finishing it lets people add, edit and remove links without leaving Nitro.",
+      "effort": "M",
+      "effort_note": "2–3 days (Word first, PowerPoint text boxes next)",
+      "risk": "Low to medium. The saved link needs a valid hyperlink relationship (TargetMode=External) so Word and PowerPoint open the file without repair; addresses must be checked (http/https/mailto only, no javascript:). Undo must remove the link and its relationship together.",
+      "perf": "No first-load change: the dialog and hover card load with the lazy Word/PowerPoint ribbon chunk (about 2–3 KB). The Rust side adds a small edit op; no effect on open time.",
+      "dod": [
+        "Insert > Links > Link and Ctrl+K open an Insert link box prefilled with the selected text; Insert turns the selection into a link (blue, underlined) and is one undo step.",
+        "With the caret in a link, Ctrl+K edits it; a hover card shows the address with Copy, Edit and Remove; Ctrl+Click opens the link (fires nitro-hyperlink for hosts).",
+        "Links to headings in the same Word document work (bookmark anchors).",
+        "Saved files open in Word and PowerPoint without repair (validator + LibreOffice round-trip in CI); only http, https and mailto addresses are accepted.",
+        "Playwright tests cover insert, edit, remove and save round-trip in Word and PowerPoint; bundle-budget and all required checks green."
+      ],
+      "issue": 558
+    },
+    {
+      "id": "print-pdf",
+      "app": "Word · Excel · PowerPoint",
+      "added": "2026-11-18",
+      "status": "New",
+      "headline": "Print or save as PDF (Ctrl+P) with a clean print preview",
+      "today_img": "img/print-today.png",
+      "today_caption": "Today: the File menu has Open, Save a copy and Close but no Print. Ctrl+P in the document does nothing (console: \"unsupported edit op file.print\"), and the browser's own Print captures the toolbar, ribbon and status bar around the page.",
+      "mock_img": "img/print-mock.png",
+      "mock_caption": "Mockup: File > Print… (Ctrl+P) opens a print view with destination (Save as PDF or a printer), page range, paper size, orientation and scale, next to a clean preview of the page.",
+      "today_detail_img": "img/print-today-detail.png",
+      "detail_img": "img/print-mock-detail.png",
+      "thumb_img": "img/print-thumb.png",
+      "why": "Printing and saving as PDF are among the most common things people do with an Office file, and Word, Excel, PowerPoint, Google Docs and OnlyOffice all have File > Print with a preview. In Nitro, Ctrl+P is already bound to a Print command that isn't implemented, so nothing happens, and printing from the browser menu includes the app's toolbar and ribbon. Rendering each page cleanly for print reuses the page painters Nitro already has.",
+      "effort": "M",
+      "effort_note": "3–4 days (Word and PowerPoint pages first; Excel print areas and page breaks next)",
+      "risk": "Medium. Long documents must render page by page without exhausting memory (draw into the print frame lazily, cap resolution). Excel needs sensible page breaks and must honour the file's print area and fit-to-page settings. Read-only, so files can't be damaged.",
+      "perf": "No first-load change: the print view is its own lazily loaded chunk (a few KB). Print renders pages on demand at print resolution, so it doesn't slow normal viewing.",
+      "dod": [
+        "File > Print… and Ctrl+P (inside the viewer) open a print view in all three apps; the browser's own Ctrl+P is not triggered.",
+        "The preview and output contain only the document pages (no app chrome), one per sheet of paper, using the file's paper size, margins and orientation; options for page range, scale, and in Excel selection / gridlines / fit sheet on one page.",
+        "Print sends the pages to the browser print dialog, where Save as PDF works; a host API el.print() (and React ref.print()) does the same.",
+        "Printing a 50-page docx and a 30-slide pptx completes without page errors and stays under the memory cap; Playwright test checks page count and that no chrome appears in page.pdf() output.",
+        "Bundle-budget and all required checks green."
+      ],
+      "issue": 559
+    },
+    {
       "id": "docx-word-count",
       "app": "Word",
       "added": "2026-11-17",
-      "status": "New",
+      "status": "Approved",
       "issue": 546,
       "headline": "See the word count in the status bar, with Word's Word Count box on click",
       "today_img": "img/docx-wordcount-today.png",
@@ -37,13 +122,14 @@
         "With text selected it shows \"S of N words\", like Word.",
         "Clicking the count opens a keyboard-accessible Word Count box (pages, words, characters with and without spaces, paragraphs, lines); Esc or Close dismisses it.",
         "Counts match Word on notes.docx (105 words) and three corpus files; Playwright test covers count, selection and dialog; bundle-budget and all required checks green."
-      ]
+      ],
+      "status_note": "Approved 2026-11-17; queued in the nightly backlog."
     },
     {
       "id": "xlsx-freeze-panes",
       "app": "Excel",
       "added": "2026-11-17",
-      "status": "New",
+      "status": "Approved",
       "issue": 547,
       "headline": "Freeze Panes: keep header rows and label columns in view while you scroll",
       "today_img": "img/xlsx-freeze-today.png",
@@ -63,13 +149,14 @@
         "Frozen rows and columns stay in view while scrolling by mouse, keyboard and scrollbars, with the freeze line drawn; selecting cells in the frozen area works.",
         "Undo/redo work; the saved file opens in Excel with the same freeze and no repair prompt (round-trip tests with and without an existing pane).",
         "Playwright test: Freeze Top Row, scroll 40 rows, row 1 still visible; bundle-budget and all required checks green."
-      ]
+      ],
+      "status_note": "Approved 2026-11-17; queued in the nightly backlog."
     },
     {
       "id": "dx-dirty-state",
       "app": "Developers · all apps",
       "added": "2026-11-17",
-      "status": "New",
+      "status": "Approved",
       "issue": 548,
       "headline": "Tell host apps when a document has unsaved changes (nitro-dirty event, el.dirty, React onDirtyChange)",
       "today_img": "img/host-dirty-today.png",
@@ -89,7 +176,8 @@
         "React: onDirtyChange(dirty) prop and isDirty() on the ref, with TypeScript types and a README example for autosave and a before-close warning.",
         "Nitro's own ribbon indicator uses the same signal (the save-and-hash probe is removed); the demo's leave warning still works.",
         "Tests for all three formats (edit → dirty, undo → clean, save → clean) plus the consumer-smoke example; bundle-budget and all required checks green."
-      ]
+      ],
+      "status_note": "Approved 2026-11-17; queued in the nightly backlog."
     },
     {
       "id": "xlsx-status-sum",
@@ -116,7 +204,7 @@
       ],
       "today_detail_img": "img/xlsx-status-today-detail.png",
       "thumb_img": "img/xlsx-status-thumb.png",
-      "status_note": "Building: nightly branch nightly/2026-11-17-xlsx-status-sum pushed 2026-11-17; PR not opened yet."
+      "status_note": "Building: draft PR #555 open (rebased on main 2026-11-18); awaits screenshot sign-off before merge."
     },
     {
       "id": "pptx-speaker-notes",
@@ -170,7 +258,7 @@
       "thumb_img": "img/docx-replace-thumb.png",
       "today_detail_img": "img/docx-replace-today-detail.png",
       "detail_img": "img/docx-replace-mock-detail.png",
-      "status_note": "Building in the 2026-11-17 nightly (Codex); PR not opened yet."
+      "status_note": "Building: Word replace pushed on branch nightly/2026-11-17-find-replace (unverified); Excel and PowerPoint still to do. No PR yet."
     }
   ]
 }

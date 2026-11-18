@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Insert and edit links (Ctrl+K), with a link card on hover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Word · PowerPoint</span><span class="badge s-new" data-status-for="558">New</span><span class="muted">Added 2026-11-18</span></div>
+<h1>Insert and edit links (Ctrl+K), with a link card on hover</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/558">Open issue #558 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/docx-link-today-detail.png"><img src="../img/docx-link-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/docx-link-mock-detail.png"><img src="../img/docx-link-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/docx-link-today.png"><img src="../img/docx-link-today.png" alt="Today: the Insert tab has Page Break, Tables and Picture but no Link, and Ctrl+K does nothing (the console logs &quot;unsupported edit op insert.link&quot;)."></a><p class="cap">Today: the Insert tab has Page Break, Tables and Picture but no Link, and Ctrl+K does nothing (the console logs &quot;unsupported edit op insert.link&quot;).</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/docx-link-mock.png"><img src="../img/docx-link-mock.png" alt="Mockup: Insert &gt; Links &gt; Link (Ctrl+K) opens an Insert link box with the selected text, an address, and links to headings in the document."></a><p class="cap">Mockup: Insert &gt; Links &gt; Link (Ctrl+K) opens an Insert link box with the selected text, an address, and links to headings in the document.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Adding a link to selected text is a basic editing step in Word, PowerPoint, Google Docs and every web editor. Nitro already reads and displays links in files and fires a nitro-hyperlink event when one is clicked, and Ctrl+K is already bound to an insert.link command, but the command does nothing. Finishing it lets people add, edit and remove links without leaving Nitro.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">M</b> 2–3 days (Word first, PowerPoint text boxes next)</span></div>
+<div><span class="k">Risk</span><span class="v">Low to medium. The saved link needs a valid hyperlink relationship (TargetMode=External) so Word and PowerPoint open the file without repair; addresses must be checked (http/https/mailto only, no javascript:). Undo must remove the link and its relationship together.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change: the dialog and hover card load with the lazy Word/PowerPoint ribbon chunk (about 2–3 KB). The Rust side adds a small edit op; no effect on open time.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Insert &gt; Links &gt; Link and Ctrl+K open an Insert link box prefilled with the selected text; Insert turns the selection into a link (blue, underlined) and is one undo step.</li><li>With the caret in a link, Ctrl+K edits it; a hover card shows the address with Copy, Edit and Remove; Ctrl+Click opens the link (fires nitro-hyperlink for hosts).</li><li>Links to headings in the same Word document work (bookmark anchors).</li><li>Saved files open in Word and PowerPoint without repair (validator + LibreOffice round-trip in CI); only http, https and mailto addresses are accepted.</li><li>Playwright tests cover insert, edit, remove and save round-trip in Word and PowerPoint; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/558">Open issue #558 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>

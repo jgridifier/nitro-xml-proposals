@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Right-click menus with the everyday commands, like Office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Word · Excel · PowerPoint</span><span class="badge s-new" data-status-for="557">New</span><span class="muted">Added 2026-11-18</span></div>
+<h1>Right-click menus with the everyday commands, like Office</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/557">Open issue #557 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/context-menu-today-detail.png"><img src="../img/context-menu-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/context-menu-mock-detail.png"><img src="../img/context-menu-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/context-menu-today.png"><img src="../img/context-menu-today.png" alt="Today: right-clicking cell F4 does nothing; no menu appears, so Insert, Delete, Clear and Format are only on the ribbon."></a><p class="cap">Today: right-clicking cell F4 does nothing; no menu appears, so Insert, Delete, Clear and Format are only on the ribbon.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/context-menu-mock.png"><img src="../img/context-menu-mock.png" alt="Mockup: Excel-style right-click menu (Cut, Copy, Paste Options, Insert…, Delete…, Clear Contents, Sort, Filter, Format Cells…) with the mini toolbar above it."></a><p class="cap">Mockup: Excel-style right-click menu (Cut, Copy, Paste Options, Insert…, Delete…, Clear Contents, Sort, Filter, Format Cells…) with the mini toolbar above it.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Right-click is how most people reach Cut, Copy, Paste, Insert row and Format Cells in Word, Excel and PowerPoint, and Google Docs, OnlyOffice and Collabora all copy it. In Nitro a right-click does nothing, so users who don&#x27;t know the ribbon layout get stuck. The editor already has a context-menu framework and a Shift+F10 shortcut entry; they just aren&#x27;t wired to right-click or filled with per-app commands.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">M</b> 2–3 days (menu framework exists; per-app item lists and wiring)</span></div>
+<div><span class="k">Risk</span><span class="v">Low to medium. Every item must call the same command as its ribbon button, so behaviour can&#x27;t drift. Right-click must first move the selection to the clicked cell, word or shape (unless it is inside the current selection), as Office does. Host apps that need the browser menu can turn it off.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change: the menu code and item lists load with each app&#x27;s lazy ribbon chunk (a few KB). Nothing runs until the user right-clicks.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Right-click (and Shift+F10 / the Menu key) opens an Office-style menu at the pointer in all three apps; Esc, click-away and arrow keys work, and it is screen-reader accessible (role=menu).</li><li>Excel: Cut, Copy, Paste Options, Insert…, Delete…, Clear Contents, Sort, Filter, Format Cells…, Row Height…, Column Width…; on row/column headers: Insert, Delete, Hide, Unhide.</li><li>Word: Cut, Copy, Paste Options, Font…, Paragraph…, Link…, bullets and numbering; PowerPoint: Cut, Copy, Paste, Duplicate, Delete, Bring to Front / Send to Back on shapes, and New Slide / Duplicate / Delete on the thumbnail rail.</li><li>Right-click moves the selection to the target first; disabled items are greyed out; a contextmenu=&quot;browser&quot; attribute (and React prop) keeps the browser&#x27;s own menu for hosts that want it.</li><li>Playwright tests cover one item per app plus keyboard open; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/557">Open issue #557 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>
