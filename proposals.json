@@ -1,7 +1,7 @@
 {
   "title": "Nitro XML Enhancement Proposals",
   "repo": "jgridifier/nitro-xml",
-  "updated": "2026-11-18",
+  "updated": "2026-11-19",
   "editions": [
     {
       "date": "2026-11-18",
@@ -21,7 +21,7 @@
       "id": "context-menu",
       "app": "Word · Excel · PowerPoint",
       "added": "2026-11-18",
-      "status": "New",
+      "status": "Approved",
       "headline": "Right-click menus with the everyday commands, like Office",
       "today_img": "img/context-menu-today.png",
       "today_caption": "Today: right-clicking cell F4 does nothing; no menu appears, so Insert, Delete, Clear and Format are only on the ribbon.",
@@ -42,13 +42,14 @@
         "Right-click moves the selection to the target first; disabled items are greyed out; a contextmenu=\"browser\" attribute (and React prop) keeps the browser's own menu for hosts that want it.",
         "Playwright tests cover one item per app plus keyboard open; bundle-budget and all required checks green."
       ],
-      "issue": 557
+      "issue": 557,
+      "status_note": "Approved 2026-11-18 (👍). Queued behind the host-API priority work."
     },
     {
       "id": "insert-link",
       "app": "Word · PowerPoint",
       "added": "2026-11-18",
-      "status": "New",
+      "status": "Approved",
       "headline": "Insert and edit links (Ctrl+K), with a link card on hover",
       "today_img": "img/docx-link-today.png",
       "today_caption": "Today: the Insert tab has Page Break, Tables and Picture but no Link, and Ctrl+K does nothing (the console logs \"unsupported edit op insert.link\").",
@@ -69,13 +70,14 @@
         "Saved files open in Word and PowerPoint without repair (validator + LibreOffice round-trip in CI); only http, https and mailto addresses are accepted.",
         "Playwright tests cover insert, edit, remove and save round-trip in Word and PowerPoint; bundle-budget and all required checks green."
       ],
-      "issue": 558
+      "issue": 558,
+      "status_note": "Approved 2026-11-18 (👍). Queued behind the host-API priority work."
     },
     {
       "id": "print-pdf",
       "app": "Word · Excel · PowerPoint",
       "added": "2026-11-18",
-      "status": "New",
+      "status": "Approved",
       "headline": "Print or save as PDF (Ctrl+P) with a clean print preview",
       "today_img": "img/print-today.png",
       "today_caption": "Today: the File menu has Open, Save a copy and Close but no Print. Ctrl+P in the document does nothing (console: \"unsupported edit op file.print\"), and the browser's own Print captures the toolbar, ribbon and status bar around the page.",
@@ -96,7 +98,8 @@
         "Printing a 50-page docx and a 30-slide pptx completes without page errors and stays under the memory cap; Playwright test checks page count and that no chrome appears in page.pdf() output.",
         "Bundle-budget and all required checks green."
       ],
-      "issue": 559
+      "issue": 559,
+      "status_note": "Approved 2026-11-18 (👍). Queued behind the host-API priority work."
     },
     {
       "id": "docx-word-count",
@@ -177,7 +180,7 @@
         "Nitro's own ribbon indicator uses the same signal (the save-and-hash probe is removed); the demo's leave warning still works.",
         "Tests for all three formats (edit → dirty, undo → clean, save → clean) plus the consumer-smoke example; bundle-budget and all required checks green."
       ],
-      "status_note": "Approved 2026-11-17; queued in the nightly backlog."
+      "status_note": "Partly shipped in PR #576 (el.dirty getter + nitro-change event, merged 2026-11-19); React onDirtyChange still to check."
     },
     {
       "id": "xlsx-status-sum",
