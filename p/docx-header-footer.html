@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Headers, footers and page numbers, like Word</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Word</span><span class="badge s-new" data-status-for="579">New</span><span class="muted">Added 2026-11-19</span></div>
+<h1>Headers, footers and page numbers, like Word</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/579">Open issue #579 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/docx-header-today-detail.png"><img src="../img/docx-header-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/docx-header-mock-detail.png"><img src="../img/docx-header-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/docx-header-today.png"><img src="../img/docx-header-today.png" alt="Today: the Insert tab has Page Break, Tables and Picture, but no Header, Footer or Page Number, and the page&#x27;s top margin is empty."></a><p class="cap">Today: the Insert tab has Page Break, Tables and Picture, but no Header, Footer or Page Number, and the page&#x27;s top margin is empty.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/docx-header-mock.png"><img src="../img/docx-header-mock.png" alt="Mockup: Insert &gt; Header &amp; Footer (Header, Footer, Page Number). The page shows a header with the document title and Page 1 of 1, as in Word."></a><p class="cap">Mockup: Insert &gt; Header &amp; Footer (Header, Footer, Page Number). The page shows a header with the document title and Page 1 of 1, as in Word.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Almost every professional Word document has a header, a footer or a page number, and people look for them on the Insert tab in Word, Google Docs, OnlyOffice and Collabora. Nitro already reads, paints and can set header and footer stories (the edit helpers landed with the earlier header/footer work), and the approved Print proposal will need those fields to show up on the printed page. What&#x27;s missing is the Insert UI and a way to type into the header or footer in the document itself.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">S</b> 1–2 days (Insert group and in-page edit surface on top of the existing header/footer renderer and set-text helpers)</span></div>
+<div><span class="k">Risk</span><span class="v">Low to medium. The saved header, footer and page-number fields must be valid so Word opens the file without a repair prompt, and they must use the document&#x27;s section (margins, first-page header if the file already has one). Typing in the header must not move the body text. A page-number field has to update when pages are added, not stay as a fixed &#x27;1&#x27;.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change: the Header &amp; Footer group and the in-page editor load with the lazily loaded Word Insert chunk (a small addition). Headers and footers already paint on each page today when a file contains them; this does not add work on open for files without them.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Insert &gt; Header &amp; Footer offers Header, Footer and Page Number (the Font and Paragraph groups stay at two rows; this is a new Insert group). Choosing Header or Footer (or double-clicking the top or bottom margin) edits that story in place, with a clear Header or Footer label, as in Word.</li><li>Page Number inserts a page-number field in the header or footer (user picks position: left, centre or right); the visible number updates when the page count changes, and a 3-page document shows 1, 2 and 3.</li><li>Saved files open in Word and LibreOffice with the header, footer and page numbers intact (validator + round-trip in CI); a file that already has headers or footers stays editable and is not rewritten on open.</li><li>Esc or double-clicking the body leaves header/footer edit; typography in the header uses the same font and paragraph commands as the body; undo covers the whole insert or edit as one step.</li><li>Playwright tests cover insert header, insert page number, edit, undo and a save round-trip; bundle-budget and all required checks green. No first-load size limit is raised.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/579">Open issue #579 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>

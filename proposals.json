@@ -4,6 +4,10 @@
   "updated": "2026-11-19",
   "editions": [
     {
+      "date": "2026-11-19",
+      "note": "Fourth edition: Excel Sort & Filter, Word comments (with a host hook), and Word headers, footers and page numbers."
+    },
+    {
       "date": "2026-11-18",
       "note": "Third edition: right-click menus, Insert link (Ctrl+K), and Print / Save as PDF. #546, #547 and #548 are approved; #540 is in draft PR #555; #542 is building."
     },
@@ -17,6 +21,87 @@
     }
   ],
   "proposals": [
+    {
+      "id": "xlsx-sort-filter",
+      "app": "Excel",
+      "added": "2026-11-19",
+      "status": "New",
+      "headline": "Sort and Filter a spreadsheet, with AutoFilter arrows on the header row",
+      "today_img": "img/xlsx-filter-today.png",
+      "today_caption": "Today: there is no Data tab and no Sort or Filter command; the first row has no AutoFilter arrows, so you can't hide or sort rows from the UI.",
+      "mock_img": "img/xlsx-filter-mock.png",
+      "mock_caption": "Mockup: Data > Sort & Filter (Sort A to Z, Sort Z to A, Filter). AutoFilter arrows sit on the first row; the open menu searches, sorts and checks values, as in Excel.",
+      "today_detail_img": "img/xlsx-filter-today-detail.png",
+      "detail_img": "img/xlsx-filter-mock-detail.png",
+      "thumb_img": "img/xlsx-filter-thumb.png",
+      "why": "Sorting a column and filtering a table are among the first things people do in a real spreadsheet, and Excel, Google Sheets, OnlyOffice and Collabora all put AutoFilter arrows on the header row. Nitro already keeps an autoFilter that arrives in a file and has SUBTOTAL / filtered-row helpers in the formula engine, but you can't turn Filter on, pick values, or Sort A to Z from the UI, and there is no Data tab. Wiring that up makes Nitro usable for everyday list work, and gives the already-approved right-click menu real Sort and Filter commands to call.",
+      "effort": "M",
+      "effort_note": "3–4 days (toggle AutoFilter, value menu, sort of the current region, and a valid autoFilter part on save)",
+      "risk": "Medium. The saved autoFilter must open in Excel without a repair prompt, and hidden rows must stay out of copy, fill and later sort. Sort rearranges values in the current region (header row stays put) and is one undo step; formulas that pointed at moved cells follow Excel's usual relative-reference behaviour. A table without a clear header row should still get arrows on the first row of the used range, as Excel does.",
+      "perf": "No first-load change: the Data tab and filter menu load with the lazily loaded Excel ribbon chunk (a few KB). Filtering hides rows already in the sheet view; it does not rescan the workbook on open. Sort is a single edit of the current region.",
+      "dod": [
+        "A Data tab (and Home > Editing if it fits in the existing group without adding a ribbon row) offers Sort A to Z, Sort Z to A and Filter; Ctrl+Shift+L toggles AutoFilter on the current region.",
+        "With Filter on, the first row of the region shows AutoFilter arrows; the menu has Search, Sort A to Z / Z to A, Select All, per-value checkboxes and Blanks; OK hides non-matching rows and is one undo step.",
+        "Sort A to Z / Z to A rearranges the data rows of the current region and leaves the header row in place; the result saves as a valid autoFilter / sorted sheet that Excel and LibreOffice reopen without repair.",
+        "Hidden rows stay hidden while the filter is on, and are skipped by copy of the visible region; clearing the filter or turning Filter off shows them again.",
+        "Playwright tests cover toggle, one value filter, sort, undo and a save round-trip; bundle-budget and all required checks green. No first-load size limit is raised; new code stays in the lazy Excel chunk."
+      ],
+      "issue": 577
+    },
+    {
+      "id": "docx-comments",
+      "app": "Word · Developers",
+      "added": "2026-11-19",
+      "status": "New",
+      "headline": "Add comments in the margin, and let host apps hook into them",
+      "today_img": "img/docx-comments-today.png",
+      "today_caption": "Today: there is no Review tab and no comment balloons. You can't attach a comment to a phrase, and a host app has no comment API to call.",
+      "mock_img": "img/docx-comments-mock.png",
+      "mock_caption": "Mockup: Review > Comments (New Comment, Delete, Resolve, Previous, Next). A highlighted phrase opens a margin card to reply or resolve, as in Word and Google Docs.",
+      "today_detail_img": "img/docx-comments-today-detail.png",
+      "detail_img": "img/docx-comments-mock-detail.png",
+      "thumb_img": "img/docx-comments-thumb.png",
+      "why": "Comments are how people review a document in Word, Google Docs, OnlyOffice and Collabora, and they are one of the main reasons a host app wants getSelection() — to anchor a note to a phrase. Nitro already has the model and edit ops to add, reply, resolve and delete Word comments, but there is no Review tab, no margin balloon, and no host event. Shipping the UI (and a small host hook) lets reviewers work in the document and lets embedding apps show or create the same comments.",
+      "effort": "M",
+      "effort_note": "2–3 days (Review tab and margin cards on top of the existing add/reply/resolve/delete ops; finish comments.xml identity on save if needed)",
+      "risk": "Low to medium. Saved comments must be valid word/comments.xml (and the document relationships) so Word opens the file without a repair prompt. Anchors must follow the selected text when the paragraph is edited, and resolved comments stay in the file but render in a quiet state, as Word does. No live multiplayer is in scope.",
+      "perf": "No first-load change: the Review tab, balloons and host helpers load with a lazily loaded Word chunk (a few KB). Opening a document that already has comments should not add a noticeable delay on typical review files.",
+      "dod": [
+        "A Review tab offers New Comment, Delete, Resolve, Previous and Next; Ctrl+Alt+M adds a comment on the current selection (or the word at the caret).",
+        "The commented range is highlighted; a margin card shows author, time, the text, Reply and Resolve; Previous/Next move between comments; Delete removes the comment and its anchor as one undo step.",
+        "Saved files open in Word and LibreOffice with the comments intact (validator + round-trip in CI); a file that already has comments shows them on open.",
+        "Host API (and React equivalents): el.getComments(), el.addComment(text) using the current selection, and a nitro-comment event when a comment is added, replied to, resolved or deleted. This complements getSelection().",
+        "Playwright tests cover add, reply, resolve, delete, save round-trip and the host hooks; bundle-budget and all required checks green. No first-load size limit is raised; new code stays in the lazy Word chunk."
+      ],
+      "issue": 578
+    },
+    {
+      "id": "docx-header-footer",
+      "app": "Word",
+      "added": "2026-11-19",
+      "status": "New",
+      "headline": "Headers, footers and page numbers, like Word",
+      "today_img": "img/docx-header-today.png",
+      "today_caption": "Today: the Insert tab has Page Break, Tables and Picture, but no Header, Footer or Page Number, and the page's top margin is empty.",
+      "mock_img": "img/docx-header-mock.png",
+      "mock_caption": "Mockup: Insert > Header & Footer (Header, Footer, Page Number). The page shows a header with the document title and Page 1 of 1, as in Word.",
+      "today_detail_img": "img/docx-header-today-detail.png",
+      "detail_img": "img/docx-header-mock-detail.png",
+      "thumb_img": "img/docx-header-thumb.png",
+      "why": "Almost every professional Word document has a header, a footer or a page number, and people look for them on the Insert tab in Word, Google Docs, OnlyOffice and Collabora. Nitro already reads, paints and can set header and footer stories (the edit helpers landed with the earlier header/footer work), and the approved Print proposal will need those fields to show up on the printed page. What's missing is the Insert UI and a way to type into the header or footer in the document itself.",
+      "effort": "S",
+      "effort_note": "1–2 days (Insert group and in-page edit surface on top of the existing header/footer renderer and set-text helpers)",
+      "risk": "Low to medium. The saved header, footer and page-number fields must be valid so Word opens the file without a repair prompt, and they must use the document's section (margins, first-page header if the file already has one). Typing in the header must not move the body text. A page-number field has to update when pages are added, not stay as a fixed '1'.",
+      "perf": "No first-load change: the Header & Footer group and the in-page editor load with the lazily loaded Word Insert chunk (a small addition). Headers and footers already paint on each page today when a file contains them; this does not add work on open for files without them.",
+      "dod": [
+        "Insert > Header & Footer offers Header, Footer and Page Number (the Font and Paragraph groups stay at two rows; this is a new Insert group). Choosing Header or Footer (or double-clicking the top or bottom margin) edits that story in place, with a clear Header or Footer label, as in Word.",
+        "Page Number inserts a page-number field in the header or footer (user picks position: left, centre or right); the visible number updates when the page count changes, and a 3-page document shows 1, 2 and 3.",
+        "Saved files open in Word and LibreOffice with the header, footer and page numbers intact (validator + round-trip in CI); a file that already has headers or footers stays editable and is not rewritten on open.",
+        "Esc or double-clicking the body leaves header/footer edit; typography in the header uses the same font and paragraph commands as the body; undo covers the whole insert or edit as one step.",
+        "Playwright tests cover insert header, insert page number, edit, undo and a save round-trip; bundle-budget and all required checks green. No first-load size limit is raised."
+      ],
+      "issue": 579
+    },
     {
       "id": "context-menu",
       "app": "Word · Excel · PowerPoint",
