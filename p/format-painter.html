@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Format Painter and Clear Formatting: copy a look in one click, or wipe it</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Word · Excel · PowerPoint</span><span class="badge s-new" data-status-for="589">New</span><span class="muted">Added 2026-11-20</span></div>
+<h1>Format Painter and Clear Formatting: copy a look in one click, or wipe it</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/589">Open issue #589 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/format-painter-today-detail.png"><img src="../img/format-painter-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/format-painter-mock-detail.png"><img src="../img/format-painter-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/format-painter-today.png"><img src="../img/format-painter-today.png" alt="Today: Home &gt; Clipboard has Cut, Copy and Paste only. There is no Format Painter, and Home &gt; Font has no Clear All Formatting button, so matching or resetting a look means redoing each setting by hand."></a><p class="cap">Today: Home &gt; Clipboard has Cut, Copy and Paste only. There is no Format Painter, and Home &gt; Font has no Clear All Formatting button, so matching or resetting a look means redoing each setting by hand.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/format-painter-mock.png"><img src="../img/format-painter-mock.png" alt="Mockup: Format Painter in Clipboard (pressed) and Clear All Formatting in Font row 1. The look of “What we shipped” is copied, then painted onto a bullet line with the brush cursor."></a><p class="cap">Mockup: Format Painter in Clipboard (pressed) and Clear All Formatting in Font row 1. The look of “What we shipped” is copied, then painted onto a bullet line with the brush cursor.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Format Painter is one of the most-used buttons in all three Office apps, and Google Docs, Sheets and Slides (paint format), OnlyOffice and Collabora (Clone Formatting) all have it. Today, making one heading, cell or text box look like another means repeating font, size, colour and alignment by hand, and there is no one-click way back to plain text. The command ids (home.format-painter, home.clear-formats) are already registered; this wires them to the selection with one shared implementation across Word, Excel and PowerPoint.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">M</b> 2–3 days (capture/apply of run + paragraph properties in Word and PowerPoint, cell style in Excel; brush cursor and sticky mode; Clear Formatting)</span></div>
+<div><span class="k">Risk</span><span class="v">Low. Painting is a normal formatting edit of the target, so it reuses existing run, paragraph and cell-style writers and is one undo step. Edge cases: painting a paragraph mark copies paragraph formatting (as Word does); Excel paints over a range by size; Esc must cancel sticky mode and leave focus in the document.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change and a few KB in each lazy ribbon chunk. Capture is a read of the current selection; apply is one edit.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Home &gt; Clipboard gains Format Painter in all three apps; single click paints once, double click stays on until Esc or a second click; Ctrl+Shift+C / Ctrl+Shift+V copy and paste formatting.</li><li>Word and PowerPoint: copies character formatting (font, size, bold/italic/underline, colour, highlight) and, when the source includes the paragraph mark, paragraph formatting; Excel copies the full cell style (number format, font, fill, borders, alignment) to the painted range.</li><li>Home &gt; Font gains Clear All Formatting (Word/PowerPoint: back to the paragraph style&#x27;s defaults; Excel: Clear Formats) without adding a ribbon row.</li><li>Each paint or clear is one undo step and survives save; files reopen in Office and LibreOffice without repair.</li><li>Playwright tests cover paint once, sticky paint, Esc, clear, undo and save round-trip in each app; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/589">Open issue #589 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>
