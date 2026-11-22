@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jump to any heading from a Navigation pane</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Word</span><span class="badge s-new" data-status-for="607">New</span><span class="muted">Added 2026-11-22</span></div>
+<h1>Jump to any heading from a Navigation pane</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/607">Open issue #607 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/docx-nav-today-detail.png"><img src="../img/docx-nav-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/docx-nav-mock-detail.png"><img src="../img/docx-nav-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/docx-nav-today.png"><img src="../img/docx-nav-today.png" alt="Today: View has only Zoom and Diagnostics. Headings are in the page, but there is no list of them, so you scroll to find a section. Ctrl+F opens a find box that does not even focus the search field."></a><p class="cap">Today: View has only Zoom and Diagnostics. Headings are in the page, but there is no list of them, so you scroll to find a section. Ctrl+F opens a find box that does not even focus the search field.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/docx-nav-mock.png"><img src="../img/docx-nav-mock.png" alt="Mockup: View &gt; Navigation (or Ctrl+F) opens a left pane with Headings, Pages and Results. The heading on screen is highlighted; click one to jump to it."></a><p class="cap">Mockup: View &gt; Navigation (or Ctrl+F) opens a left pane with Headings, Pages and Results. The heading on screen is highlighted; click one to jump to it.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Word, Google Docs (the document outline) and OnlyOffice all offer a headings list so you can jump around a long document without scrolling. Nitro already paginates and knows paragraph styles (Title, Heading 1–3), and v0.2.0 added get/setPosition, so a jump is a scroll, not a new layout engine. Ctrl+F today opens a find box that does not focus the search field; this puts Find in a Navigation pane with Headings, Pages and Results, the way Word does.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">S</b> 1–2 days (Navigation button on View, heading walk from styles, click-to-scroll, Pages list, Results reuses today&#x27;s find and focuses the box, Ctrl+F)</span></div>
+<div><span class="k">Risk</span><span class="v">Low. The pane is read-mostly and does not change the file. Headings without a heading style are omitted, as in Word&#x27;s outline. Navigation is one button in the existing Show group on View, so Font and Paragraph stay at two rows.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change: a few KB in the lazily loaded Word chrome chunk. The heading list is built from the already-loaded document model; jump uses the existing scroll and position APIs. The loader stays under 17,408 B.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>View &gt; Navigation (pressed while open) shows a left pane with Headings, Pages and Results; Ctrl+F opens it on Results with the search box focused.</li><li>Headings lists Title and Heading 1–3 in document order, indents by level, and highlights the heading currently on screen; click or Enter scrolls that heading into view and moves the caret.</li><li>The list updates after typing, style changes and undo; an empty document or a document with no headings shows a short empty state.</li><li>Pages lists one row per page and jumps to that page. Results is today&#x27;s find (replace stays with #542) inside the same pane.</li><li>Playwright tests cover open/close, click-to-jump, keyboard, empty state and focused search; Font and Paragraph stay at two rows; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/607">Open issue #607 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>
