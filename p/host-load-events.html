@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Let host apps show load progress, know when a big file is viewable, and cancel it</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Developers · all apps</span><span class="badge s-new" data-status-for="614">New</span><span class="muted">Added 2026-11-23</span></div>
+<h1>Let host apps show load progress, know when a big file is viewable, and cancel it</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/614">Open issue #614 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/host-load-today-detail.png"><img src="../img/host-load-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/host-load-mock-detail.png"><img src="../img/host-load-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/host-load-today.png"><img src="../img/host-load-today.png" alt="Today: while a workbook opens, the host can only show an indeterminate spinner. The element fires no progress, no &#x27;first sheet is on screen&#x27; signal and no load error event, and loadUrl cannot be cancelled."></a><p class="cap">Today: while a workbook opens, the host can only show an indeterminate spinner. The element fires no progress, no &#x27;first sheet is on screen&#x27; signal and no load error event, and loadUrl cannot be cancelled.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/host-load-mock.png"><img src="../img/host-load-mock.png" alt="Mockup: the host shows a real progress bar and a toast with Cancel. Sheet1 is scrollable as soon as nitro-ready fires while the remaining sheets keep loading. The event log on the right shows the proposed events."></a><p class="cap">Mockup: the host shows a real progress bar and a toast with Cancel. Sheet1 is scrollable as soon as nitro-ready fires while the remaining sheets keep loading. The event log on the right shows the proposed events.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Big workbooks are where Nitro has to feel fast, for example in previews of large Excel files kept on shared storage. Today the host cannot tell &#x27;still unzipping&#x27; from &#x27;hung&#x27;, cannot say &#x27;first sheet ready&#x27;, and cannot stop a 40 MB open when the user clicks away. Embedding APIs from OnlyOffice (onAppReady / onDocumentReady / onError) and Collabora (App_LoadingStatus: Frame_Ready, Document_Loaded) both expose these milestones.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">S</b> 1–2 days (forward the worker&#x27;s existing open phases as nitro-loadstart / nitro-progress / nitro-ready / nitro-load / nitro-error, an AbortSignal option on loadUrl/loadBuffer/loadFile, typed details in index.d.ts, React onProgress/onReady/onLoad/onError props, README section)</span></div>
+<div><span class="k">Risk</span><span class="v">Low. The events are additive and read-only. Progress is throttled to at most one event per animation frame so it never slows parsing. Abort must free the worker and keep the previous document on screen, which the reload() work already does.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change: a few hundred bytes in the loader (well under the 17,408 B eager budget). Events are posted from phases the worker already runs; no extra parsing or copying.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>&lt;nitro-docx&gt;, &lt;nitro-xlsx&gt; and &lt;nitro-pptx&gt; fire nitro-loadstart {name, bytes}, nitro-progress {phase, loaded, total} (at most once per frame), nitro-ready when the first page/sheet/slide is painted, nitro-load when everything is loaded, and nitro-error {code, message} for password-protected, corrupt and over-limit files.</li><li>loadUrl, loadBuffer and loadFile accept {signal}; abort() rejects with AbortError, frees the worker and keeps the previous document and position.</li><li>Typed event details in loader/index.d.ts and React props onProgress, onReady, onLoad and onError on &lt;NitroViewer&gt;; documented in the loader README with a copy-paste host example.</li><li>Events never fire for reload() with keepPosition unless asked, never mark the document dirty and never move focus.</li><li>Browser e2e test in demo/host-api covers event order, abort mid-load and each error code on an L-tier workbook; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/614">Open issue #614 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>

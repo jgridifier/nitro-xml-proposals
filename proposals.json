@@ -1,8 +1,12 @@
 {
   "title": "Nitro XML Enhancement Proposals",
   "repo": "jgridifier/nitro-xml",
-  "updated": "2026-11-22",
+  "updated": "2026-11-23",
   "editions": [
+    {
+      "date": "2026-11-23",
+      "note": "Seventh edition: Excel range selection that keeps up with the mouse (from Jared's comment on #606), Excel AutoSum, and load-progress / ready / cancel events for host apps. Jared's 👍 on #606, #607 and #608 is applied (approved). #588 and #590 are building in today's nightly."
+    },
     {
       "date": "2026-11-22",
       "note": "Sixth edition, catch-up after the 21–22 usage outage: Excel Insert Chart, a Word Navigation pane, and PowerPoint Slide Sorter. Jared's 👍 on #588, #589 and #590 is applied (approved). #548 is partly shipped in v0.2.0 (el.dirty + nitro-change; React onDirtyChange still in draft PR #597). #546 is building in draft PR #605."
@@ -30,10 +34,91 @@
   ],
   "proposals": [
     {
+      "id": "xlsx-selection",
+      "app": "Excel",
+      "added": "2026-11-23",
+      "status": "New",
+      "headline": "Range selection that keeps up with your mouse, like Excel",
+      "today_img": "img/xlsx-select-today.png",
+      "today_caption": "Today (B12:E19 dragged): the range gets an outline but no shading. Clicking a column or row header does not select it, dragging past the bottom edge does not auto-scroll, and there is no size tip or Ctrl+click second range.",
+      "mock_img": "img/xlsx-select-mock.png",
+      "mock_caption": "Mockup: a shaded range with the active cell left white, a second Ctrl+click range (G14:H17), a size tip (8R × 4C) at the pointer, edge auto-scroll, and header click to select whole columns or rows. A CI test holds pointer-to-paint to one frame.",
+      "today_detail_img": "img/xlsx-select-today-detail.png",
+      "detail_img": "img/xlsx-select-mock-detail.png",
+      "thumb_img": "img/xlsx-select-thumb.png",
+      "why": "Jared's comment on #606: range selection feels less responsive than Excel, as in many open-source editors, and it is a part of the experience he wants Nitro to do really well. Selecting is the first step of almost every Excel action (format, chart, sum, copy). Excel and Google Sheets shade the range, select whole columns and rows from the headers, auto-scroll at the edges and paint on the next frame. Light probe on main ee9789c: header click and edge auto-scroll do nothing today; drag, Shift+click, Shift+Arrow and Ctrl+A already work.",
+      "effort": "M",
+      "effort_note": "2–4 days (selection painted as a main-thread overlay updated every animation frame, with no wait on the worker; shaded fill; header click/drag/Shift+click for columns and rows; Ctrl+click multi-range in the model and getSelection; edge auto-scroll with speed by distance; size tip; latency trace test). Ctrl+Arrow jumps stay with #519.",
+      "risk": "Medium. Multi-range selection touches copy, Clear, formatting and getSelection, which must act on all ranges or say clearly that they cannot. The overlay must stay pixel-aligned with the painted grid at every zoom and with frozen panes (#547).",
+      "perf": "Selection should get cheaper: drag updates a lightweight overlay each frame instead of repainting the grid. No first-load change; the code lives in the existing Excel shell. The loader stays under 17,408 B.",
+      "dod": [
+        "Dragging, Shift+click and Shift+Arrow paint a shaded range (active cell white) and update the Name Box on the next animation frame; a Playwright trace test on a 100k-row sheet holds pointer-to-paint p95 ≤ 16 ms at 1×–4× CPU throttle.",
+        "Clicking a column or row header selects it; dragging across headers or Shift+clicking selects many; the corner button and Ctrl+A select all.",
+        "Dragging past any edge auto-scrolls, faster the further the pointer goes, and stops when the pointer comes back inside.",
+        "Ctrl/Cmd+click and Ctrl+drag add ranges; Clear, Bold, number formats and copy apply to every range; getSelection reports all ranges.",
+        "A size tip (for example 8R × 4C) follows the pointer while dragging; Font, Alignment and Number groups stay at two rows; bundle-budget and all required checks green."
+      ],
+      "issue": 612
+    },
+    {
+      "id": "xlsx-autosum",
+      "app": "Excel",
+      "added": "2026-11-23",
+      "status": "New",
+      "headline": "AutoSum (Σ, Alt+=): total a column in one click, with Average, Count, Max and Min",
+      "today_img": "img/xlsx-autosum-today.png",
+      "today_caption": "Today: the Editing group on Excel's Home tab has only Clear and Find. To total a column you must type =SUM( and the range by hand, and Alt+= does nothing.",
+      "mock_img": "img/xlsx-autosum-mock.png",
+      "mock_caption": "Mockup: AutoSum (Σ) in Home > Editing with a menu of Sum, Average, Count Numbers, Max and Min. It proposes =SUM(B1:B10) and shows the range dashed so you can adjust it before pressing Enter.",
+      "today_detail_img": "img/xlsx-autosum-today-detail.png",
+      "detail_img": "img/xlsx-autosum-mock-detail.png",
+      "thumb_img": "img/xlsx-autosum-thumb.png",
+      "why": "AutoSum is one of the most-used buttons in Excel and the quickest way to a total. Excel, Google Sheets (Σ Functions), OnlyOffice and Collabora all have it. Nitro already calculates SUM, AVERAGE, COUNT, MAX and MIN, so this is a small change that removes a lot of typing.",
+      "effort": "S",
+      "effort_note": "1–2 days (Editing group button with menu, range guess: contiguous numbers above, else left, stopping at blanks/text and existing totals; Alt+=; block selection fills a total row/column; uses the existing formula engine and one undo step)",
+      "risk": "Low. Only writes ordinary formulas. The range guess must match Excel (stop at the first blank or text cell, skip a header row) so users are not surprised. Font, Alignment and Number groups are unchanged and stay at two rows.",
+      "perf": "No first-load change: a few KB in the lazily loaded Excel ribbon chunk. Recalc reuses the existing session calculator.",
+      "dod": [
+        "Home > Editing shows AutoSum (Σ) with a split menu: Sum, Average, Count Numbers, Max, Min; Alt+= runs Sum.",
+        "On a single cell it proposes the contiguous numbers above (else to the left) as =SUM(range), shows the range dashed, and Enter commits; Esc cancels.",
+        "With a block selected (for example B1:E10), it writes totals in the row below (or column to the right) for every column in one undo step.",
+        "Formulas save with <f> and cached <v> and reopen in Excel and LibreOffice with the same values.",
+        "Playwright tests cover the range guess (blank stop, header skip, left fallback), each function, block totals, undo and save round-trip; Font, Alignment and Number groups stay at two rows; bundle-budget and all required checks green."
+      ],
+      "issue": 613
+    },
+    {
+      "id": "host-load-events",
+      "app": "Developers · all apps",
+      "added": "2026-11-23",
+      "status": "New",
+      "headline": "Let host apps show load progress, know when a big file is viewable, and cancel it",
+      "today_img": "img/host-load-today.png",
+      "today_caption": "Today: while a workbook opens, the host can only show an indeterminate spinner. The element fires no progress, no 'first sheet is on screen' signal and no load error event, and loadUrl cannot be cancelled.",
+      "mock_img": "img/host-load-mock.png",
+      "mock_caption": "Mockup: the host shows a real progress bar and a toast with Cancel. Sheet1 is scrollable as soon as nitro-ready fires while the remaining sheets keep loading. The event log on the right shows the proposed events.",
+      "today_detail_img": "img/host-load-today-detail.png",
+      "detail_img": "img/host-load-mock-detail.png",
+      "thumb_img": "img/host-load-thumb.png",
+      "why": "Big workbooks are where Nitro has to feel fast, for example in previews of large Excel files kept on shared storage. Today the host cannot tell 'still unzipping' from 'hung', cannot say 'first sheet ready', and cannot stop a 40 MB open when the user clicks away. Embedding APIs from OnlyOffice (onAppReady / onDocumentReady / onError) and Collabora (App_LoadingStatus: Frame_Ready, Document_Loaded) both expose these milestones.",
+      "effort": "S",
+      "effort_note": "1–2 days (forward the worker's existing open phases as nitro-loadstart / nitro-progress / nitro-ready / nitro-load / nitro-error, an AbortSignal option on loadUrl/loadBuffer/loadFile, typed details in index.d.ts, React onProgress/onReady/onLoad/onError props, README section)",
+      "risk": "Low. The events are additive and read-only. Progress is throttled to at most one event per animation frame so it never slows parsing. Abort must free the worker and keep the previous document on screen, which the reload() work already does.",
+      "perf": "No first-load change: a few hundred bytes in the loader (well under the 17,408 B eager budget). Events are posted from phases the worker already runs; no extra parsing or copying.",
+      "dod": [
+        "<nitro-docx>, <nitro-xlsx> and <nitro-pptx> fire nitro-loadstart {name, bytes}, nitro-progress {phase, loaded, total} (at most once per frame), nitro-ready when the first page/sheet/slide is painted, nitro-load when everything is loaded, and nitro-error {code, message} for password-protected, corrupt and over-limit files.",
+        "loadUrl, loadBuffer and loadFile accept {signal}; abort() rejects with AbortError, frees the worker and keeps the previous document and position.",
+        "Typed event details in loader/index.d.ts and React props onProgress, onReady, onLoad and onError on <NitroViewer>; documented in the loader README with a copy-paste host example.",
+        "Events never fire for reload() with keepPosition unless asked, never mark the document dirty and never move focus.",
+        "Browser e2e test in demo/host-api covers event order, abort mid-load and each error code on an L-tier workbook; bundle-budget and all required checks green."
+      ],
+      "issue": 614
+    },
+    {
       "id": "xlsx-insert-chart",
       "app": "Excel",
       "added": "2026-11-22",
-      "status": "New",
+      "status": "Approved",
       "headline": "Turn a selected range into a chart, from a new Insert tab",
       "today_img": "img/xlsx-chart-today.png",
       "today_caption": "Today: Excel has only File, Home and View. There is no Insert tab and no way to make a chart, so a selected range of numbers (A1:D6 here) stays a range of numbers.",
@@ -54,13 +139,14 @@
         "Editing a source cell updates the chart after the edit is committed.",
         "Playwright tests cover each type, undo, move, save round-trip and OOXML/LibreOffice validation; Font, Alignment and Number groups stay at two rows; bundle-budget and all required checks green."
       ],
-      "issue": 606
+      "issue": 606,
+      "status_note": "Approved 2026-11-22 (👍); label applied 2026-11-23. Queued for the nightly build. Jared's comment on range-selection responsiveness is proposed separately as #612."
     },
     {
       "id": "docx-navigation",
       "app": "Word",
       "added": "2026-11-22",
-      "status": "New",
+      "status": "Approved",
       "headline": "Jump to any heading from a Navigation pane",
       "today_img": "img/docx-nav-today.png",
       "today_caption": "Today: View has only Zoom and Diagnostics. Headings are in the page, but there is no list of them, so you scroll to find a section. Ctrl+F opens a find box that does not even focus the search field.",
@@ -81,13 +167,14 @@
         "Pages lists one row per page and jumps to that page. Results is today's find (replace stays with #542) inside the same pane.",
         "Playwright tests cover open/close, click-to-jump, keyboard, empty state and focused search; Font and Paragraph stay at two rows; bundle-budget and all required checks green."
       ],
-      "issue": 607
+      "issue": 607,
+      "status_note": "Approved 2026-11-22 (👍); label applied 2026-11-23. Queued for the nightly build."
     },
     {
       "id": "pptx-slide-sorter",
       "app": "PowerPoint",
       "added": "2026-11-22",
-      "status": "New",
+      "status": "Approved",
       "headline": "See every slide at once and drag to reorder, in Slide Sorter view",
       "today_img": "img/pptx-sorter-today.png",
       "today_caption": "Today: View has Zoom, a Slide pane toggle and Previous/Next. The only way to see the deck is the narrow left rail in Normal view, so checking the flow or reordering several slides means a lot of scrolling and Move Slide Up/Down.",
@@ -107,13 +194,14 @@
         "Click selects; double-click, View > Normal or Escape returns to Normal on that slide; arrow keys and Previous/Next move the selection.",
         "Playwright tests cover open, reorder, delete, duplicate, undo, return to Normal and save; bundle-budget and all required checks green."
       ],
-      "issue": 608
+      "issue": 608,
+      "status_note": "Approved 2026-11-22 (👍); label applied 2026-11-23. Queued for the nightly build."
     },
     {
       "id": "xlsx-cell-format",
       "app": "Excel",
       "added": "2026-11-20",
-      "status": "Approved",
+      "status": "Building",
       "headline": "Colour cells, add borders and Merge & Center from Excel's Home tab",
       "today_img": "img/xlsx-cellfmt-today.png",
       "today_caption": "Today: Excel Home > Font has Bold, Italic, Underline, Strikethrough and font size only. There is no Borders, Fill Color or Font Color, and Alignment has no Merge & Center, so you can't format a simple table.",
@@ -135,7 +223,7 @@
         "Playwright tests cover each border type, fill, font colour, merge/unmerge, undo and a save round-trip; bundle-budget and all required checks green; no first-load size limit raised."
       ],
       "issue": 588,
-      "status_note": "Approved 2026-11-20 (👍). Queued behind the host-API priority work. Label applied on the 2026-11-22 catch-up run."
+      "status_note": "Building: nightly session started 2026-11-23 about 5 AM ET on branch nightly/2026-11-23-xlsx-cell-format; a draft PR opens when it finishes."
     },
     {
       "id": "format-painter",
@@ -163,13 +251,13 @@
         "Playwright tests cover paint once, sticky paint, Esc, clear, undo and save round-trip in each app; bundle-budget and all required checks green."
       ],
       "issue": 589,
-      "status_note": "Approved 2026-11-20 (👍). Queued behind the host-API priority work. Label applied on the 2026-11-22 catch-up run."
+      "status_note": "Approved 2026-11-20 (👍). Queued for the nightly build (host-API v0.2.0 shipped 2026-11-22). Label applied on the 2026-11-22 catch-up run."
     },
     {
       "id": "host-ribbon",
       "app": "Developers · all apps",
       "added": "2026-11-20",
-      "status": "Approved",
+      "status": "Building",
       "headline": "Let host apps hide, add and run ribbon commands (ribbon option, execCommand, nitro-command event)",
       "today_img": "img/host-ribbon-today.png",
       "today_caption": "Today: an embedding app gets the full or embedded toolbar as-is. It can't hide Open or Insert Picture, can't add its own “Send for review” button, and has no public way to run a command like Bold from its own UI.",
@@ -191,7 +279,7 @@
         "README host-API section documents the option, the generated command-id list and an example; bundle-budget and all required checks green."
       ],
       "issue": 590,
-      "status_note": "Approved 2026-11-20 (👍). Queued behind the host-API priority work. Label applied on the 2026-11-22 catch-up run."
+      "status_note": "Building: nightly session started 2026-11-23 about 5 AM ET on branch nightly/2026-11-23-host-ribbon; a draft PR opens when it finishes."
     },
     {
       "id": "xlsx-sort-filter",
@@ -219,7 +307,7 @@
         "Playwright tests cover toggle, one value filter, sort, undo and a save round-trip; bundle-budget and all required checks green. No first-load size limit is raised; new code stays in the lazy Excel chunk."
       ],
       "issue": 577,
-      "status_note": "Approved 2026-11-20 (👍). Queued behind the host-API priority work."
+      "status_note": "Approved 2026-11-20 (👍). Queued for the nightly build (host-API v0.2.0 shipped 2026-11-22)."
     },
     {
       "id": "docx-comments",
@@ -275,7 +363,7 @@
         "Playwright tests cover insert header, insert page number, edit, undo and a save round-trip; bundle-budget and all required checks green. No first-load size limit is raised."
       ],
       "issue": 579,
-      "status_note": "Approved 2026-11-20 (👍). Queued behind the host-API priority work."
+      "status_note": "Approved 2026-11-20 (👍). Queued for the nightly build (host-API v0.2.0 shipped 2026-11-22)."
     },
     {
       "id": "context-menu",
@@ -303,7 +391,7 @@
         "Playwright tests cover one item per app plus keyboard open; bundle-budget and all required checks green."
       ],
       "issue": 557,
-      "status_note": "Approved 2026-11-18 (👍). Queued behind the host-API priority work."
+      "status_note": "Approved 2026-11-18 (👍). Queued for the nightly build (host-API v0.2.0 shipped 2026-11-22)."
     },
     {
       "id": "insert-link",
@@ -331,7 +419,7 @@
         "Playwright tests cover insert, edit, remove and save round-trip in Word and PowerPoint; bundle-budget and all required checks green."
       ],
       "issue": 558,
-      "status_note": "Approved 2026-11-18 (👍). Queued behind the host-API priority work."
+      "status_note": "Approved 2026-11-18 (👍). Queued for the nightly build (host-API v0.2.0 shipped 2026-11-22)."
     },
     {
       "id": "print-pdf",
@@ -359,7 +447,7 @@
         "Bundle-budget and all required checks green."
       ],
       "issue": 559,
-      "status_note": "Approved 2026-11-18 (👍). Queued behind the host-API priority work."
+      "status_note": "Approved 2026-11-18 (👍). Queued for the nightly build (host-API v0.2.0 shipped 2026-11-22)."
     },
     {
       "id": "docx-word-count",

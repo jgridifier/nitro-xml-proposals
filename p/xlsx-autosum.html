@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AutoSum (Σ, Alt+=): total a column in one click, with Average, Count, Max and Min</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Excel</span><span class="badge s-new" data-status-for="613">New</span><span class="muted">Added 2026-11-23</span></div>
+<h1>AutoSum (Σ, Alt+=): total a column in one click, with Average, Count, Max and Min</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/613">Open issue #613 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/xlsx-autosum-today-detail.png"><img src="../img/xlsx-autosum-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/xlsx-autosum-mock-detail.png"><img src="../img/xlsx-autosum-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/xlsx-autosum-today.png"><img src="../img/xlsx-autosum-today.png" alt="Today: the Editing group on Excel&#x27;s Home tab has only Clear and Find. To total a column you must type =SUM( and the range by hand, and Alt+= does nothing."></a><p class="cap">Today: the Editing group on Excel&#x27;s Home tab has only Clear and Find. To total a column you must type =SUM( and the range by hand, and Alt+= does nothing.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/xlsx-autosum-mock.png"><img src="../img/xlsx-autosum-mock.png" alt="Mockup: AutoSum (Σ) in Home &gt; Editing with a menu of Sum, Average, Count Numbers, Max and Min. It proposes =SUM(B1:B10) and shows the range dashed so you can adjust it before pressing Enter."></a><p class="cap">Mockup: AutoSum (Σ) in Home &gt; Editing with a menu of Sum, Average, Count Numbers, Max and Min. It proposes =SUM(B1:B10) and shows the range dashed so you can adjust it before pressing Enter.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">AutoSum is one of the most-used buttons in Excel and the quickest way to a total. Excel, Google Sheets (Σ Functions), OnlyOffice and Collabora all have it. Nitro already calculates SUM, AVERAGE, COUNT, MAX and MIN, so this is a small change that removes a lot of typing.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">S</b> 1–2 days (Editing group button with menu, range guess: contiguous numbers above, else left, stopping at blanks/text and existing totals; Alt+=; block selection fills a total row/column; uses the existing formula engine and one undo step)</span></div>
+<div><span class="k">Risk</span><span class="v">Low. Only writes ordinary formulas. The range guess must match Excel (stop at the first blank or text cell, skip a header row) so users are not surprised. Font, Alignment and Number groups are unchanged and stay at two rows.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change: a few KB in the lazily loaded Excel ribbon chunk. Recalc reuses the existing session calculator.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Home &gt; Editing shows AutoSum (Σ) with a split menu: Sum, Average, Count Numbers, Max, Min; Alt+= runs Sum.</li><li>On a single cell it proposes the contiguous numbers above (else to the left) as =SUM(range), shows the range dashed, and Enter commits; Esc cancels.</li><li>With a block selected (for example B1:E10), it writes totals in the row below (or column to the right) for every column in one undo step.</li><li>Formulas save with &lt;f&gt; and cached &lt;v&gt; and reopen in Excel and LibreOffice with the same values.</li><li>Playwright tests cover the range guess (blank stop, header skip, left fallback), each function, block totals, undo and save round-trip; Font, Alignment and Number groups stay at two rows; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/613">Open issue #613 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>
