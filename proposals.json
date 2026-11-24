@@ -48,7 +48,7 @@
    ],
    "app": "Excel · Developers",
    "added": "2026-11-24",
-   "status": "New",
+   "status": "Approved",
    "headline": "Open huge workbooks straight from storage: fetch only the bytes on screen, stream the rest, no size wall",
    "today_label": "TODAY · from code and measured data",
    "today_img": "img/strategic-xlsx-stream-today.png",
@@ -119,7 +119,7 @@
     "React <NitroViewer src> preview mode plus docs for S3 presigned URLs and EFS behind nginx. Load progress / ready / cancel events work (#614).",
     "Eager loader under 17,408 B brotli. docs/perf gains a throttled-network row. All required checks green."
    ],
-   "status_note": "New strategic bet (2026-11-24). Builds on #210 (closed) and proposal #614.",
+   "status_note": "Approved 2026-11-24 (👍). Strategic multi-milestone bet; queued for the nightly build behind host-API priority work. Build lands as phased draft PRs (milestone 1 first).",
    "issue": 622
   },
   {
@@ -129,7 +129,7 @@
    ],
    "app": "Word · Developers",
    "added": "2026-11-24",
-   "status": "New",
+   "status": "Approved",
    "headline": "Open long Word documents in about a second: page 1 first, the rest laid out in the background, only visible pages kept in memory",
    "today_label": "TODAY · measured (Chromium first paint)",
    "today_img": "img/strategic-docx-progressive-today.png",
@@ -196,7 +196,7 @@
     "Typing on page 300 re-lays out only from that paragraph forward, and the docx edit perf gate stays green.",
     "Eager loader under 17,408 B brotli. All required checks green."
    ],
-   "status_note": "New strategic bet (2026-11-24). Addresses the docx XL first-paint failure measured in PR #556.",
+   "status_note": "Approved 2026-11-24 (👍). Strategic multi-milestone bet; queued for the nightly build behind host-API priority work. Build lands as phased draft PRs (milestone 1 first).",
    "issue": 623
   },
   {
@@ -206,7 +206,7 @@
    ],
    "app": "Excel · Developers",
    "added": "2026-11-24",
-   "status": "New",
+   "status": "Approved",
    "headline": "PivotTables: show them as real pivots, refresh them, and build new ones from a field list",
    "today_img": "img/strategic-pivot-today.png",
    "today_caption": "Today: the corpus file poi-ExcelPivotTableSample.xlsx (sheet Tabelle3) opens with its pivot as plain cells, with no pivot styling, field buttons or filter dropdown, and no way to refresh it or make a new one.",
@@ -268,7 +268,7 @@
     "Host API: getPivots(), pivot.create and pivot.set-fields ops, and a nitro-pivot-change event, typed and documented.",
     "Ribbon groups stay at 2 rows or fewer. Eager loader under 17,408 B brotli. All required checks green."
    ],
-   "status_note": "New strategic bet (2026-11-24).",
+   "status_note": "Approved 2026-11-24 (👍). Strategic multi-milestone bet; queued for the nightly build behind host-API priority work. Build lands as phased draft PRs (milestone 1 first).",
    "issue": 624
   },
   {
