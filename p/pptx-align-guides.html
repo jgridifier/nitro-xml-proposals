@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Line shapes up: smart guides while dragging, plus Align and Distribute</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">PowerPoint</span><span class="badge s-new" data-status-for="619">New</span><span class="muted">Added 2026-11-24</span></div>
+<h1>Line shapes up: smart guides while dragging, plus Align and Distribute</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/619">Open issue #619 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/pptx-align-today-detail.png"><img src="../img/pptx-align-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/pptx-align-mock-detail.png"><img src="../img/pptx-align-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/pptx-align-today.png"><img src="../img/pptx-align-today.png" alt="Today (slide 2, dragging the third card&#x27;s text box): no guides appear and nothing snaps, so it is easy to drop a shape a few pixels off. The Arrange group has order and group buttons but no Align or Distribute."></a><p class="cap">Today (slide 2, dragging the third card&#x27;s text box): no guides appear and nothing snaps, so it is easy to drop a shape a few pixels off. The Arrange group has order and group buttons but no Align or Distribute.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/pptx-align-mock.png"><img src="../img/pptx-align-mock.png" alt="Mockup: while dragging, red dashed smart guides show when the card&#x27;s top, middle or bottom line up with the others, and equal-gap markers show the spacing matches. A new Align menu in Arrange offers Align Left/Center/Right/Top/Middle/Bottom and Distribute."></a><p class="cap">Mockup: while dragging, red dashed smart guides show when the card&#x27;s top, middle or bottom line up with the others, and equal-gap markers show the spacing matches. A new Align menu in Arrange offers Align Left/Center/Right/Top/Middle/Bottom and Distribute.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Lining things up is the most frequent fiddly task in PowerPoint, and misaligned boxes are what makes a slide look amateur. PowerPoint, Google Slides, OnlyOffice and Collabora Impress all show smart guides while dragging and have Align/Distribute. Nitro already has shape drag, resize, group and z-order, so this fills the obvious gap in the Arrange group.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">M</b> 2–3 days (Align menu: 6 align + 2 distribute commands, relative to slide or selection, each one undo step; smart guides computed from sibling edges/centres and slide centre with ~5 px snap, Alt to bypass; equal-spacing markers; arrow keys nudge, Ctrl+arrow fine nudge)</span></div>
+<div><span class="k">Risk</span><span class="v">Low. Align and Distribute only change shape offsets (a:off), which the pptx writer already persists. Snapping must not fight the user: it is off while Alt is held and only within a few pixels. Arrange stays two rows (Align is one small labelled button); Font and Paragraph groups are unchanged.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change: a few KB in the lazily loaded PowerPoint editor chunk. Guide search is linear in shapes on the slide and runs once per animation frame during a drag.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Home &gt; Arrange has an Align menu: Align Left/Center/Right/Top/Middle/Bottom, Distribute Horizontally/Vertically, Align to Slide / Align Selected Objects; each is one undo step and works on multi-selection.</li><li>Dragging a shape shows dashed smart guides when an edge or centre lines up with another shape or the slide centre, and snaps within ~5 px; Alt disables snapping.</li><li>Equal-gap markers appear when the dragged shape&#x27;s spacing matches its neighbours&#x27;.</li><li>Arrow keys nudge the selection; positions save to a:off and reopen identically in PowerPoint and LibreOffice.</li><li>Playwright tests cover each align/distribute command, snapping on and off, undo and save round-trip; Arrange stays two rows, Font and Paragraph groups at most two rows; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/619">Open issue #619 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>

@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conditional Formatting: data bars, colour scales and highlight rules, with live preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="../favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+<link rel="apple-touch-icon" href="../img/apple-touch-icon.png"><link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Nitro Proposals"><meta name="theme-color" content="#0a1b37">
+<link rel="stylesheet" href="../style.css"></head><body>
+<header class="top"><a class="brand" href="../index.html"><img class="logo" src="../img/icon-192.png" alt="" width="24" height="24">Nitro XML <span class="muted">Proposals</span></a>
+<a class="toplink" href="https://github.com/jgridifier/nitro-xml">Repo</a></header><main class="detail">
+<p class="crumb"><a href="../index.html">← All proposals</a></p>
+<div class="meta"><span class="app">Excel</span><span class="badge s-new" data-status-for="618">New</span><span class="muted">Added 2026-11-24</span></div>
+<h1>Conditional Formatting: data bars, colour scales and highlight rules, with live preview</h1>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/618">Open issue #618 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+<h3 class="sub">Close-up of the change</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY</figcaption><a href="../img/xlsx-cf-today-detail.png"><img src="../img/xlsx-cf-today-detail.png" alt="Today close-up"></a></figure>
+<figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../img/xlsx-cf-mock-detail.png"><img src="../img/xlsx-cf-mock-detail.png" alt="Mockup close-up"></a></figure></div><h3 class="sub">Full screen</h3><div class="pair">
+<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../img/xlsx-cf-today.png"><img src="../img/xlsx-cf-today.png" alt="Today (F11:F22 selected): Nitro already paints conditional formats that come in the file (the red-to-green colour scale on rows 1–10), but the Home tab has no way to add, change or remove one."></a><p class="cap">Today (F11:F22 selected): Nitro already paints conditional formats that come in the file (the red-to-green colour scale on rows 1–10), but the Home tab has no way to add, change or remove one.</p></figure>
+<figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../img/xlsx-cf-mock.png"><img src="../img/xlsx-cf-mock.png" alt="Mockup: a Styles group on Home with Conditional Formatting. Hovering Data Bars › blue previews bars on the selection; a &#x27;Greater Than 140&#x27; highlight rule shades column H. Rules save as standard Excel conditional formatting."></a><p class="cap">Mockup: a Styles group on Home with Conditional Formatting. Hovering Data Bars › blue previews bars on the selection; a &#x27;Greater Than 140&#x27; highlight rule shades column H. Rules save as standard Excel conditional formatting.</p></figure>
+</div><p class="hint">Tap an image to open it full size.</p>
+<h2>Why</h2><p class="body">Conditional formatting is how people actually read a sheet of numbers: outliers in red, a heat map, bars that show size at a glance. Excel, Google Sheets, OnlyOffice and Collabora all have it on the main toolbar. Nitro already renders these rules when a file has them, so adding the authoring side mostly means writing the same XML the painter already reads.</p>
+<div class="facts">
+<div><span class="k">Effort</span><span class="v"><b class="eff">M</b> 3–4 days (Styles group button + menu; Highlight Cells Rules (greater/less/between/equal/text contains/duplicates), Top/Bottom (top 10, above average), Data Bars, Color Scales, Icon Sets presets; live preview on hover; Clear Rules from selection/sheet; simple Manage Rules list; one undo step per rule)</span></div>
+<div><span class="k">Risk</span><span class="v">Medium. Rules must write valid x:conditionalFormatting/cfRule (with x14 extensions for gradient data bars) and keep rules that came in the file intact; Excel&#x27;s priority and Stop If True ordering must be respected. Font, Alignment and Number groups are unchanged and stay at two rows.</span></div>
+<div><span class="k">Perf / bundle</span><span class="v">No first-load change: menu and dialog live in the lazily loaded Excel ribbon chunk (a few KB). The painter already evaluates rules; live preview re-paints only the visible selection.</span></div></div>
+<h2>Definition of done</h2><ul class="dod"><li>Home &gt; Styles has Conditional Formatting with Highlight Cells Rules, Top/Bottom Rules, Data Bars, Color Scales, Icon Sets, New Rule…, Clear Rules and Manage Rules…</li><li>Hovering a preset previews it on the selection; clicking applies it as one undo step; Clear Rules works on selection and whole sheet.</li><li>Manage Rules lists rules for the selection/sheet with edit, delete and reorder; rules that came in the file are shown and preserved.</li><li>Saved files contain standard conditionalFormatting/cfRule XML and reopen in Excel and LibreOffice with the same look; untouched rules round-trip byte-identical.</li><li>Playwright tests cover each preset family, preview, undo, clear and save round-trip; Font, Alignment and Number groups stay at two rows; bundle-budget and all required checks green.</li></ul>
+<div class="vote big"><a class="btn" href="https://github.com/jgridifier/nitro-xml/issues/618">Open issue #618 to vote</a><p class="howto"><b>Approve:</b> tap 👍 on the issue · <b>Decline:</b> tap 👎</p></div>
+</main><footer class="foot"><p>Updated daily. Each proposal links to one GitHub issue: 👍 approves it, 👎 declines it.
+Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b> are illustrations, not shipped features.</p>
+<p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
+<script src="../status.js"></script></body></html>
