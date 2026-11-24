@@ -52,3 +52,9 @@ figure{margin:0}figure img{border:1px solid var(--line);border-radius:12px}
 main.detail .snote{margin:4px 0 14px}
 .snote a{color:#1a73e8}
 .meta .added{color:#80868b;font-size:12px;margin-left:auto}
+
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:#0a1b37;color:#fff}
+.sectnote{margin:-8px 0 16px;color:var(--mut);font-size:15px}
+.small{font-size:14px;margin:0 0 8px}
+.phases{padding-left:22px;margin:0}.phases li{margin:10px 0;overflow-wrap:anywhere}.phases b{font-weight:500;display:block}.phases .ms{color:var(--mut);font-size:15px}
+.ev{padding-left:20px;margin:0}.ev li{margin:8px 0;overflow-wrap:anywhere}.evsrc{display:block;color:#80868b;font-size:13px}

@@ -5,6 +5,10 @@
  "editions": [
   {
    "date": "2026-11-24",
+   "note": "Afternoon edition, the first Strategic bets: multi-week, roadmap-level bets that change where Nitro stands. (1) Open huge workbooks straight from storage with HTTP Range streaming and no 50 MiB wall. (2) Long Word documents in about a second with page-1-first background layout. (3) PivotTables you can see, refresh and build. Each has a phased plan, evidence with sources, and its own issue (#622–#624). Also: #612 range selection started building in the agy lane, and #548's React slice has a second draft PR, #621."
+  },
+  {
+   "date": "2026-11-24",
    "note": "Eighth edition: Excel Conditional Formatting (data bars, colour scales, highlight rules), PowerPoint smart guides with Align and Distribute, and a host API to highlight cells, text or shapes without touching the file (for AI citations). Jared's 👍 on #612 is applied (approved). #588 and #590 now have draft PRs #617 and #616. #542 moved back to Approved: no open PR, only an idle Word-only branch."
   },
   {
@@ -37,6 +41,236 @@
   }
  ],
  "proposals": [
+  {
+   "id": "strategic-xlsx-stream",
+   "tags": [
+    "Strategic"
+   ],
+   "app": "Excel · Developers",
+   "added": "2026-11-24",
+   "status": "New",
+   "headline": "Open huge workbooks straight from storage: fetch only the bytes on screen, stream the rest, no size wall",
+   "today_label": "TODAY · from code and measured data",
+   "today_img": "img/strategic-xlsx-stream-today.png",
+   "today_caption": "Today: loadUrl() downloads every byte (fetch, then arrayBuffer) before parsing starts, and files over 50 MiB compressed are refused with \"Package too large.\" The engine itself is fast: 48.7 ms to the first view of a 17.2 MB workbook.",
+   "mock_img": "img/strategic-xlsx-stream-mock.png",
+   "mock_caption": "Mockup: the host preview paints the first screen after fetching only the zip directory, workbook, styles and the visible row blocks with HTTP Range requests; the rest streams in a worker or on scroll, with progress and Cancel.",
+   "today_detail_img": "img/strategic-xlsx-stream-today-detail.png",
+   "detail_img": "img/strategic-xlsx-stream-mock-detail.png",
+   "thumb_img": "img/strategic-xlsx-stream-thumb.png",
+   "why": "Big-workbook previews are where Nitro can beat everyone, and that is the case Jared's company has: very large Excel files on AWS EFS, previewed in a React app. Parsing is already fast (Nitro's engine shows the first view of a 17.2 MB workbook in 48.7 ms; the TypeScript engine it replaced takes 5,069 ms). The bottleneck now is the network and a size cap: every byte must arrive before parsing starts, and anything over 50 MiB is refused. This bet removes both. Nitro reads the zip directory with HTTP Range requests, fetches only the parts and rows on screen, streams the rest in a worker, and keeps memory flat on million-row sheets.",
+   "wins": "Embedding developers first: preview panes in React and host apps over S3, CloudFront, or EFS behind a web server, where today the whole file crosses the network before anything shows. Then every user who opens a big workbook. Today Nitro is fast once the bytes arrive. This bet makes it fast from the moment the file is requested, with no file-size ceiling for URL sources.",
+   "phases": [
+    {
+     "name": "M1 · Range-request open (about 1 week)",
+     "ships": "loadUrl / src reads the zip central directory with HTTP Range and fetches only workbook, styles, shared strings and the first visible sheet. If the server ignores Range or CORS hides Content-Range, it falls back to today's full download. This milestone already helps any Range-capable store on its own."
+    },
+    {
+     "name": "M2 · Streaming first view in a worker (1–2 weeks)",
+     "ships": "The visible sheet is inflated and parsed in row blocks as bytes arrive. The first screen paints from the first blocks, and load progress / ready / cancel events fire (absorbs proposal #614)."
+    },
+    {
+     "name": "M3 · Million-row grid with flat memory (1–2 weeks)",
+     "ships": "A row-block cache with eviction keeps memory bounded on a 1,048,576-row sheet, and jumping to any row fetches only that block. The 50 MiB cap is lifted for streamed URL sources only. In-memory buffers keep the cap, and the zip-bomb and ratio guards stay unchanged."
+    },
+    {
+     "name": "M4 · React + storage recipe (3–5 days)",
+     "ships": "<NitroViewer src preview> in React, a docs recipe for S3 presigned URLs and EFS behind nginx/CloudFront, and a throttled-network row in the browser perf table."
+    }
+   ],
+   "evidence": [
+    {
+     "text": "First view of the 17.2 MB XL workbook: 48.7 ms in Nitro's engine vs 5,069 ms in the TS engine. Peak memory 44.6 MiB vs 1,682.7 MiB.",
+     "source": "docs/perf/wasm-vs-ts.md (PRs #553 and #556, measured 2026-11-17)"
+    },
+    {
+     "text": "Browser first paint of that workbook: 399 ms median, 658 ms p95, served from localhost. Network time on a real store is not in these numbers yet.",
+     "source": "docs/perf/browser-e2e.json (PR #556)"
+    },
+    {
+     "text": "URL loads download the whole file before parsing: fetch(url), then arrayBuffer(), then loadBuffer().",
+     "source": "packages/nitro-xml/loader/lazy/load-url.js, main ee9789c (v0.2.0)"
+    },
+    {
+     "text": "Inputs over 50 MiB compressed throw input_too_large, which users see as \"Package too large.\"",
+     "source": "packages/nitro-xml/loader/formats.js checkInputSize, main ee9789c"
+    },
+    {
+     "text": "#210 (closed) made parsing lazy per sheet and viewport-only. Byte-range access was in its spec, but URL loading still reads everything.",
+     "source": "issue #210"
+    },
+    {
+     "text": "Demand: Jared's company previews very large Excel files from AWS EFS in a React app. Proposal #614 (load progress / ready / cancel) is open.",
+     "source": "Jared, 2026-11-19; issue #614"
+    },
+    {
+     "text": "For comparison, Google Sheets caps a spreadsheet at 10 million cells and converts xlsx into its own format to edit it. Excel's grid is 1,048,576 rows × 16,384 columns.",
+     "source": "Google Sheets and Microsoft Excel published limits"
+    }
+   ],
+   "effort": "L",
+   "effort_note": "Multi-week: about 4–6 weeks over 4 milestones, each shippable alone",
+   "risk": "Medium to high. Zip parts are deflate-compressed, so a sheet's rows can only be read in order from the start of its part. Random access to row 900,000 may mean streaming the bytes before it once and caching block offsets. Servers without Range support, or with CORS that hides Content-Range, need a clean fallback. The zip-bomb and ratio guards must hold for each streamed part.",
+   "perf": "Goal: time to first screen depends on the bytes shown, not on file size, and memory stays flat while scrolling 1M rows. The Range reader and stream glue go in a new lazy chunk loaded only for URL sources. The eager loader must stay under 17,408 B brotli. Draft PR #621's branch measured 17,159 B, so the loader change can only be a tiny lazy import.",
+   "dod": [
+    "Opening a 200 MB or larger xlsx by URL from a Range-capable test server paints the first screen without downloading the whole file. A CI test checks that bytes fetched before first paint are 10% of the file or less, and that first paint is 1.5 s or less at a 'Fast 4G' throttle.",
+    "Servers without Range support fall back to today's full download with identical output. Zip-bomb, ratio and part-size guards still trip.",
+    "Scrolling or jumping to row 1,000,000 of a 1M-row sheet fetches only the blocks it needs, and a memory CI keeps the heap within a fixed budget.",
+    "React <NitroViewer src> preview mode plus docs for S3 presigned URLs and EFS behind nginx. Load progress / ready / cancel events work (#614).",
+    "Eager loader under 17,408 B brotli. docs/perf gains a throttled-network row. All required checks green."
+   ],
+   "status_note": "New strategic bet (2026-11-24). Builds on #210 (closed) and proposal #614.",
+   "issue": 622
+  },
+  {
+   "id": "strategic-docx-progressive",
+   "tags": [
+    "Strategic"
+   ],
+   "app": "Word · Developers",
+   "added": "2026-11-24",
+   "status": "New",
+   "headline": "Open long Word documents in about a second: page 1 first, the rest laid out in the background, only visible pages kept in memory",
+   "today_label": "TODAY · measured (Chromium first paint)",
+   "today_img": "img/strategic-docx-progressive-today.png",
+   "today_caption": "Today (measured): a 200-slide deck and a 1M-cell workbook paint in about 260 ms, a 500-page Word document takes 980 ms, and the 11.8 MB XL document did not paint within 90 s in 5 of 5 runs.",
+   "mock_img": "img/strategic-docx-progressive-mock.png",
+   "mock_caption": "Mockup: page 1 shows right away; the page rail fills in as layout continues in the background; the status bar says the page count is still counting; only pages near the screen stay in memory.",
+   "today_detail_img": "img/strategic-docx-progressive-today-detail.png",
+   "detail_img": "img/strategic-docx-progressive-mock-detail.png",
+   "thumb_img": "img/strategic-docx-progressive-thumb.png",
+   "why": "Contracts, reports and manuals often run to hundreds of pages, and Word is Nitro's slowest format. A 500-page document takes 980 ms to first paint, against 266 ms for a 1M-cell workbook. The 11.8 MB XL document never painted within 90 seconds. The engine numbers point to work that grows with document length before page 1 appears: 449.8 ms to open the 500-page file, against 9.7 ms for the large workbook. Word and PDF viewers show the first page and keep laying out the rest. This bet does the same, then keeps memory flat and makes editing a long document cheap.",
+   "wins": "Users first: anyone opening a long contract, thesis or report. Then embedding developers whose apps preview Word attachments (document review, AI chat over files), where one large .docx must never freeze the tab. This closes Nitro's only large-file gap: Excel and PowerPoint already beat the TS engine by 100× or more at the large tiers.",
+   "phases": [
+    {
+     "name": "M1 · Profile + page 1 first (about 1 week)",
+     "ships": "Profile pages_500.docx and xl_a.docx to find what blocks first paint. Lay out and paint the first screenful of pages before the rest. 'Page 1 of …' counts up as layout continues."
+    },
+    {
+     "name": "M2 · Background layout off the main thread (1–2 weeks)",
+     "ships": "Pagination continues in the worker in time-sliced batches, so scrolling and typing stay responsive. Scrolling to a page that isn't laid out yet jumps to an estimated position and settles once that page is ready."
+    },
+    {
+     "name": "M3 · Page virtualization (about 1 week)",
+     "ships": "Only pages near the viewport keep their DOM or canvas. The rest are light placeholders at the right height, so memory stays flat past 1,000 pages."
+    },
+    {
+     "name": "M4 · Incremental re-layout on edit (1–2 weeks)",
+     "ships": "Typing re-lays out from the edited paragraph only until page breaks settle, so editing page 300 never touches pages 1–299."
+    }
+   ],
+   "evidence": [
+    {
+     "text": "docx XL (xl_a.docx, 11,773,330 B): the browser render did not complete within 90 s in 5 of 5 runs.",
+     "source": "docs/perf/browser-e2e.json and docs/perf/wasm-vs-ts.md (PR #556)"
+    },
+    {
+     "text": "Browser first paint (median): docx L (pages_500.docx) 980 ms; xlsx L (cells_1m.xlsx) 266 ms; pptx L (slides_200.pptx) 261 ms.",
+     "source": "docs/perf/browser-e2e.json (PR #556)"
+    },
+    {
+     "text": "Engine cold open, L tier: docx 449.75 ms, xlsx 9.73 ms, pptx 6.69 ms. Against the TS engine, docx L improves only 2.5× (ratio 0.401); xlsx L and pptx L improve about 160–200× (ratios 0.006 and 0.005).",
+     "source": "docs/perf/wasm-vs-ts.md (PR #553)"
+    },
+    {
+     "text": "Peak memory: docx L 209.0 MiB vs xlsx L 22.7 MiB.",
+     "source": "docs/perf/wasm-vs-ts.md (PR #556)"
+    },
+    {
+     "text": "Large docx is already causing problems: #550 (the TS oracle can't open docx XL) and a docx_load memory-cut branch (Part of #30). Issue #23 (Print Layout painter) is still open.",
+     "source": "issues #550, #30, #23"
+    },
+    {
+     "text": "How others do it: desktop Word paginates in the background (the page count grows as it works), and PDF viewers show page 1 before the rest of the document has loaded.",
+     "source": "observed competitor behaviour"
+    }
+   ],
+   "effort": "L",
+   "effort_note": "Multi-week: about 4–6 weeks over 4 milestones, each shippable alone",
+   "risk": "High in places. Each page break depends on everything before it (widow and orphan control, keep-with-next, floating objects, section breaks, footnotes), so background layout must end up with exactly today's pagination. A page-count and pixel parity test on every docx fixture guards that. PAGE and NUMPAGES fields and TOC page numbers show estimates until layout finishes.",
+   "perf": "Goal: page 1 paints in under 1 s at every docx tier, including XL, and memory stays flat beyond the visible pages. Layout scheduling lives in Rust/WASM. Placeholders and virtualization live in the lazy Word chunk. No new eager JS; the loader stays under 17,408 B brotli.",
+   "dod": [
+    "browser-e2e: docx XL (xl_a.docx) paints page 1 in 1 s median or less (today: nothing within 90 s), and docx L in 400 ms or less, published in docs/perf.",
+    "Once background layout finishes, page count and per-page pixels match today's full layout on every docx fixture.",
+    "Scrolling a 1,000-page document keeps the heap within a fixed budget (memory CI), and the status bar shows 'Page X of Y', updating as layout continues.",
+    "Typing on page 300 re-lays out only from that paragraph forward, and the docx edit perf gate stays green.",
+    "Eager loader under 17,408 B brotli. All required checks green."
+   ],
+   "status_note": "New strategic bet (2026-11-24). Addresses the docx XL first-paint failure measured in PR #556.",
+   "issue": 623
+  },
+  {
+   "id": "strategic-pivot",
+   "tags": [
+    "Strategic"
+   ],
+   "app": "Excel · Developers",
+   "added": "2026-11-24",
+   "status": "New",
+   "headline": "PivotTables: show them as real pivots, refresh them, and build new ones from a field list",
+   "today_img": "img/strategic-pivot-today.png",
+   "today_caption": "Today: the corpus file poi-ExcelPivotTableSample.xlsx (sheet Tabelle3) opens with its pivot as plain cells, with no pivot styling, field buttons or filter dropdown, and no way to refresh it or make a new one.",
+   "mock_img": "img/strategic-pivot-mock.png",
+   "mock_caption": "Mockup: the same pivot painted as a pivot (header band, grand-total row, filter and row-label dropdowns), a PivotTable tab, and a PivotTable Fields pane with Filters / Columns / Rows / Values areas, Refresh and Insert PivotTable.",
+   "today_detail_img": "img/strategic-pivot-today-detail.png",
+   "detail_img": "img/strategic-pivot-mock-detail.png",
+   "thumb_img": "img/strategic-pivot-thumb.png",
+   "why": "PivotTables are how most Excel users summarise data, and every serious competitor has them: Excel, Google Sheets, OnlyOffice and LibreOffice/Collabora. Nitro keeps pivots intact on save, but shows them as plain cells. The engine's own warning says they are 'kept on save but are not refreshed or shown as pivot tables'. The formula engine and dependency graph already exist to compute the aggregates. This bet makes pivots first-class in three shippable steps, then opens them to host apps so an AI assistant can build a summary the user can inspect and save.",
+   "wins": "Users first: analysts, finance and ops teams, the same people who open the big workbooks. Then embedding developers: an agent asked for 'total by region' can create a real, refreshable pivot instead of pasting static numbers. Pivots are the largest everyday Excel feature Nitro doesn't have yet.",
+   "phases": [
+    {
+     "name": "M1 · Show pivots faithfully (about 1 week)",
+     "ships": "Read pivotTable and pivotCache parts, then paint pivot styles, row and column headers, subtotals, grand totals, field buttons and the page-filter '(Multiple Items)' dropdown. Read-only."
+    },
+    {
+     "name": "M2 · Refresh, filter, expand and collapse (1–2 weeks)",
+     "ships": "Recompute from the worksheet source (Sum, Count, Average, Min, Max), with field filters and collapsible groups. Save writes cache records that Excel opens without a repair prompt."
+    },
+    {
+     "name": "M3 · Insert PivotTable + field list (about 2 weeks)",
+     "ships": "Insert > PivotTable from a selected range (reusing the Insert tab from approved #606), a PivotTable Fields pane with Filters / Columns / Rows / Values areas, drag to rearrange, live update, one undo step per change."
+    },
+    {
+     "name": "M4 · Host API for pivots (3–5 days)",
+     "ships": "getPivots(), applyEdit ops pivot.create and pivot.set-fields, and a nitro-pivot-change event, typed and documented for AI agents."
+    }
+   ],
+   "evidence": [
+    {
+     "text": "Today: poi-ExcelPivotTableSample.xlsx (in the test corpus) shows its pivot on Tabelle3 as plain cells (screenshot above, live demo at v0.2.0, taken 2026-11-24).",
+     "source": "fixtures/real/xlsx/poi-ExcelPivotTableSample.xlsx; live demo"
+    },
+    {
+     "text": "The engine warns on open: 'Pivot tables are kept on save but are not refreshed or shown as pivot tables.'",
+     "source": "rs/crates/nitro-xml-xlsx/src/workbook.rs, main ee9789c"
+    },
+    {
+     "text": "The calculation base exists: formula parser, dependency graph and function library (#71–#77, all closed).",
+     "source": "issues #71–#77"
+    },
+    {
+     "text": "No existing issue or proposal covers pivots. Approved #606 (Insert tab + charts) and #577 (Sort & Filter) add the Insert tab and filter UI this bet reuses.",
+     "source": "proposal issues #540–#620, BACKLOG.md"
+    },
+    {
+     "text": "Competitors: Excel, Google Sheets, OnlyOffice and LibreOffice/Collabora all create and refresh pivot tables.",
+     "source": "competitor feature sets"
+    }
+   ],
+   "effort": "L",
+   "effort_note": "Multi-week: about 5–7 weeks over 4 milestones, each shippable alone",
+   "risk": "Medium to high. The pivot XML model is large (definitions, caches, records, styles, OLAP and Data Model pivots). M1–M2 cover worksheet-source pivots only and keep everything else read-only with a clear note. Saved files must open in Excel without a repair prompt, which the existing round-trip and validator CI enforces.",
+   "perf": "Aggregation runs in Rust over cache records. Target: refresh of a 1M-row source in under 1 s, measured in CI on generated data. The pivot UI and field list go in a new lazy chunk loaded only when a workbook has pivots or the user inserts one. No first-load growth; the eager loader stays under 17,408 B brotli.",
+   "dod": [
+    "poi-ExcelPivotTableSample.xlsx and the other corpus pivots render with pivot style, headers, totals, field buttons and filter dropdowns, checked by a pixel test against an Excel-rendered reference.",
+    "Refresh recomputes after source edits, and filter and collapse work. The saved file opens in Excel with no repair prompt and refreshes to the same values.",
+    "Insert > PivotTable on a range opens the field list. Dragging fields between Filters, Columns, Rows and Values updates the pivot live, and Ctrl+Z undoes each change.",
+    "Host API: getPivots(), pivot.create and pivot.set-fields ops, and a nitro-pivot-change event, typed and documented.",
+    "Ribbon groups stay at 2 rows or fewer. Eager loader under 17,408 B brotli. All required checks green."
+   ],
+   "status_note": "New strategic bet (2026-11-24).",
+   "issue": 624
+  },
   {
    "id": "xlsx-conditional-format",
    "app": "Excel",
@@ -147,7 +381,7 @@
     "A size tip (for example 8R × 4C) follows the pointer while dragging; Font, Alignment and Number groups stay at two rows; bundle-budget and all required checks green."
    ],
    "issue": 612,
-   "status_note": "Approved 2026-11-23 (👍); label applied 2026-11-24. Queued for the nightly build behind host-API priority work."
+   "status_note": "Approved 2026-11-23 (👍). Work started 2026-11-24 at 4 PM in the agy lane (branch agy/612-range-select); no PR yet."
   },
   {
    "id": "xlsx-autosum",
@@ -617,7 +851,7 @@
     "Nitro's own ribbon indicator uses the same signal (the save-and-hash probe is removed); the demo's leave warning still works.",
     "Tests for all three formats (edit → dirty, undo → clean, save → clean) plus the consumer-smoke example; bundle-budget and all required checks green."
    ],
-   "status_note": "Partly shipped in v0.2.0 (tagged ee9789c, published 2026-11-22): el.dirty + nitro-change. React onDirtyChange is still in draft PR #597."
+   "status_note": "Partly shipped in v0.2.0 (tagged ee9789c, published 2026-11-22): el.dirty + nitro-change. React onDirtyChange is in draft PRs #597 and #621 (agy cut-down of #597, opened 2026-11-24), both waiting for review."
   },
   {
    "id": "xlsx-status-sum",

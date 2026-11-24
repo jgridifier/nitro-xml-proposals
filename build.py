@@ -49,10 +49,26 @@ Approved proposals go into the nightly build queue. Images labelled <b>MOCKUP</b
 <p class="muted">Design inspired by research-publication sites. Not affiliated with Google.</p></footer>
 <script src="{rel}status.js"></script></body></html>"""
 
+def tags(p):
+    return "".join(f'<span class="tag t-{E(t.lower())}">{E(t)}</span>' for t in p.get("tags", []))
+
+def is_strategic(p):
+    return "Strategic" in p.get("tags", [])
+
+def strategic_sections(p):
+    """Optional strategic-bet blocks: who it wins, phased plan, evidence with sources."""
+    if not is_strategic(p):
+        return ""
+    ph = "".join(f'<li><b>{E(m["name"])}</b><span class="ms">{E(m["ships"])}</span></li>' for m in p.get("phases", []))
+    ev = "".join(f'<li>{E(x["text"])}<span class="evsrc">Source: {E(x["source"])}</span></li>' for x in p.get("evidence", []))
+    return (f'<h2>Who it wins</h2><p class="body">{E(p.get("wins",""))}</p>'
+            f'<h2>Phased plan</h2><p class="muted small">Each milestone ships on its own.</p><ol class="phases">{ph}</ol>'
+            f'<h2>Evidence</h2><ul class="ev">{ev}</ul>')
+
 def card(p):
     return f"""<article class="card"><a class="cardlink" href="p/{p['id']}.html">
 <div class="thumb"><img src="{p.get('thumb_img',p['mock_img'])}" alt="Mockup: {E(p['headline'])}" loading="lazy"><span class="mocktag">MOCKUP</span></div>
-<div class="cbody"><div class="meta"><span class="app">{E(p['app'])}</span>{badge(p)}<span class="effort">Effort {p['effort']}</span><span class="added">{E(p['added'])}</span></div>
+<div class="cbody"><div class="meta">{tags(p)}<span class="app">{E(p['app'])}</span>{badge(p)}<span class="effort">Effort {p['effort']}</span><span class="added">{E(p['added'])}</span></div>
 <h3>{E(p['headline'])}</h3><p class="why1">{E(p['why'].split('. ')[0])}.</p></div></a>
 {note(p)}{vote(p)}</article>"""
 
@@ -61,13 +77,16 @@ def index():
     counts = {s: sum(1 for p in ps if p["status"] == s) for s in STATUSES}
     chips = "".join(f'<span class="chip s-{s.lower()}">{s} · {counts[s]}</span>' for s in STATUSES if counts[s])
     feat = ps[0]
+    strat = [p for p in ps if is_strategic(p)]
+    rest = [p for p in ps if not is_strategic(p)]
     out = head(D["title"], "") + f"""<main>
 <section class="hero"><p class="eyebrow">Edition {E(D['updated'])}</p>
 <h1>Enhancement proposals for Nitro XML</h1>
 <p class="lede">Each card is one change that brings Nitro closer to Word, Excel and PowerPoint. Look at the picture, then vote on its issue: <b>👍 to approve</b>, <b>👎 to decline</b>. About 30 seconds each.</p>
 <div class="chips">{chips}</div></section>
+{('<h2 class="sect">Strategic bets</h2><p class="sectnote">Multi-week, roadmap-level bets that change where Nitro stands. Each ships in milestones; vote the same way.</p><section class="grid">' + ''.join(card(p) for p in strat) + '</section>') if strat else ''}
 <h2 class="sect">Proposals</h2>
-<section class="grid">{''.join(card(p) for p in ps)}</section>
+<section class="grid">{''.join(card(p) for p in rest)}</section>
 </main>""" + FOOT.replace("{rel}", "")
     open(os.path.join(ROOT, "index.html"), "w").write(out)
 
@@ -80,7 +99,7 @@ def pair(p):
 <figure><figcaption class="lab mock">MOCKUP</figcaption><a href="../{m}"><img src="../{m}" alt="Mockup close-up"></a></figure></div>"""
     full_h = '<h3 class="sub">Full screen</h3>' if det else ''
     return det + full_h + f"""<div class="pair">
-<figure><figcaption class="lab today">TODAY · real screenshot</figcaption><a href="../{p['today_img']}"><img src="../{p['today_img']}" alt="{E(p['today_caption'])}"></a><p class="cap">{E(p['today_caption'])}</p></figure>
+<figure><figcaption class="lab today">{E(p.get('today_label','TODAY · real screenshot'))}</figcaption><a href="../{p['today_img']}"><img src="../{p['today_img']}" alt="{E(p['today_caption'])}"></a><p class="cap">{E(p['today_caption'])}</p></figure>
 <figure><figcaption class="lab mock">PROPOSED · MOCKUP</figcaption><a href="../{p['mock_img']}"><img src="../{p['mock_img']}" alt="{E(p['mock_caption'])}"></a><p class="cap">{E(p['mock_caption'])}</p></figure>
 </div><p class="hint">Tap an image to open it full size.</p>"""
 
@@ -88,11 +107,11 @@ def detail(p):
     dod = "".join(f"<li>{E(x)}</li>" for x in p["dod"])
     out = head(p["headline"], "../") + f"""<main class="detail">
 <p class="crumb"><a href="../index.html">← All proposals</a></p>
-<div class="meta"><span class="app">{E(p['app'])}</span>{badge(p)}<span class="muted">Added {E(p['added'])}</span></div>
+<div class="meta">{tags(p)}<span class="app">{E(p['app'])}</span>{badge(p)}<span class="muted">Added {E(p['added'])}</span></div>
 <h1>{E(p['headline'])}</h1>
 {note(p)}{vote(p, big=True)}
 {pair(p)}
-<h2>Why</h2><p class="body">{E(p['why'])}</p>
+<h2>Why</h2><p class="body">{E(p['why'])}</p>{strategic_sections(p)}
 <div class="facts">
 <div><span class="k">Effort</span><span class="v"><b class="eff">{p['effort']}</b> {E(p.get('effort_note',''))}</span></div>
 <div><span class="k">Risk</span><span class="v">{E(p['risk'])}</span></div>
