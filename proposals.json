@@ -41,7 +41,7 @@
    "id": "xlsx-conditional-format",
    "app": "Excel",
    "added": "2026-11-24",
-   "status": "New",
+   "status": "Approved",
    "headline": "Conditional Formatting: data bars, colour scales and highlight rules, with live preview",
    "today_img": "img/xlsx-cf-today.png",
    "today_caption": "Today (F11:F22 selected): Nitro already paints conditional formats that come in the file (the red-to-green colour scale on rows 1–10), but the Home tab has no way to add, change or remove one.",
@@ -62,13 +62,14 @@
     "Saved files contain standard conditionalFormatting/cfRule XML and reopen in Excel and LibreOffice with the same look; untouched rules round-trip byte-identical.",
     "Playwright tests cover each preset family, preview, undo, clear and save round-trip; Font, Alignment and Number groups stay at two rows; bundle-budget and all required checks green."
    ],
-   "issue": 618
+   "issue": 618,
+   "status_note": "Approved 2026-11-24 (👍). Queued for the nightly build behind host-API priority work and #612."
   },
   {
    "id": "pptx-align-guides",
    "app": "PowerPoint",
    "added": "2026-11-24",
-   "status": "New",
+   "status": "Approved",
    "headline": "Line shapes up: smart guides while dragging, plus Align and Distribute",
    "today_img": "img/pptx-align-today.png",
    "today_caption": "Today (slide 2, dragging the third card's text box): no guides appear and nothing snaps, so it is easy to drop a shape a few pixels off. The Arrange group has order and group buttons but no Align or Distribute.",
@@ -89,13 +90,14 @@
     "Arrow keys nudge the selection; positions save to a:off and reopen identically in PowerPoint and LibreOffice.",
     "Playwright tests cover each align/distribute command, snapping on and off, undo and save round-trip; Arrange stays two rows, Font and Paragraph groups at most two rows; bundle-budget and all required checks green."
    ],
-   "issue": 619
+   "issue": 619,
+   "status_note": "Approved 2026-11-24 (👍). Queued for the nightly build behind host-API priority work and #612."
   },
   {
    "id": "host-highlights",
    "app": "Developers · all apps",
    "added": "2026-11-24",
-   "status": "New",
+   "status": "Approved",
    "headline": "Let host apps highlight cells, text or shapes (for example AI citations) without touching the file",
    "today_img": "img/host-highlights-today.png",
    "today_caption": "Today (embedded workbook): a host can move the selection or edit cell formatting, but has no way to mark a range temporarily. Pointing at 'B11:B20' means stealing the user's selection or dirtying the file.",
@@ -116,7 +118,8 @@
     "Highlights are never saved, never mark the document dirty (el.dirty stays false, save() bytes unchanged) and survive reload(bytes) when their address is still valid.",
     "Playwright tests cover all three formats, zoom, frozen panes and reload; TypeScript types and README section added; bundle-budget and all required checks green."
    ],
-   "issue": 620
+   "issue": 620,
+   "status_note": "Approved 2026-11-24 (👍). Queued for the nightly build behind host-API priority work and #612."
   },
   {
    "id": "xlsx-selection",
