@@ -1,8 +1,12 @@
 {
  "title": "Nitro XML Enhancement Proposals",
  "repo": "jgridifier/nitro-xml",
- "updated": "2026-11-24",
+ "updated": "2026-11-25",
  "editions": [
+  {
+   "date": "2026-11-25",
+   "note": "Ninth edition: Word Review tab with Track Changes (today a redlined file shows old and new text run together), Excel row/column resize, AutoFit and Hide & Unhide, and a host API to read the document as data (outline, paragraphs, tables, any cell range, slide text) for agents. #612 range selection is building in draft PR #625. #607 is back to Approved: the overnight attempt stalled with no code."
+  },
   {
    "date": "2026-11-24",
    "note": "Afternoon edition, the first Strategic bets: multi-week, roadmap-level bets that change where Nitro stands. (1) Open huge workbooks straight from storage with HTTP Range streaming and no 50 MiB wall. (2) Long Word documents in about a second with page-1-first background layout. (3) PivotTables you can see, refresh and build. Each has a phased plan, evidence with sources, and its own issue (#622–#624). Also: #612 range selection started building in the agy lane, and #548's React slice has a second draft PR, #621."
@@ -41,6 +45,87 @@
   }
  ],
  "proposals": [
+  {
+   "id": "host-read-content",
+   "app": "Developers · all apps",
+   "added": "2026-11-25",
+   "status": "New",
+   "headline": "Let host apps read the document as data: outline, paragraphs, tables, any cell range, slide text",
+   "today_img": "img/host-read-today.png",
+   "today_caption": "Today (embedded Word document): the only read API is getSelection(), which in Word returns the caret only, and in Excel only the user's current selection (max 10,000 cells, values without formulas). To answer \"summarize this\", a host has to unzip and parse the OOXML itself.",
+   "mock_img": "img/host-read-mock.png",
+   "mock_caption": "Mockup: the host's agent calls el.getContent() and gets the title, a heading outline and typed blocks (paragraphs with style, tables as rows) that match what is on screen; badges show which block each part came from. getRange() reads any sheet range with formulas; PowerPoint returns slide titles, text and notes.",
+   "today_detail_img": "img/host-read-today-detail.png",
+   "detail_img": "img/host-read-mock-detail.png",
+   "thumb_img": "img/host-read-thumb.png",
+   "why": "Hosts that put Nitro next to an AI agent need the document's content, not just its pixels: to summarize, answer questions, cite (with #620 highlights) or index it. Nitro has already parsed the whole model in its worker, so returning it as plain JSON is cheap, and it saves every host from shipping a second OOXML parser that can disagree with what the user sees. OnlyOffice and Collabora expose similar document-builder and UNO reads; Office.js has body.getText, tables and range.values.",
+   "effort": "M",
+   "effort_note": "3–4 days (getContent() per format from the worker model: docx title/outline/blocks with style, list level and table rows; xlsx getRange(address, {formulas, formats}) for any sheet plus getContent() sheet list with used ranges; pptx slides with title, shape text in reading order and notes; block ids that line up with getSelection/setPosition/highlights; size limits with truncated flags; TypeScript types, React handle methods)",
+   "risk": "Low. Read-only and additive: no writes, no undo entries, never marks the file dirty. The main risk is a stable, documented JSON shape; it is versioned (schema: 1) and covered by contract tests so later engine changes don't break hosts.",
+   "perf": "No first-load change: the serializer runs in the existing worker and ships in the lazy host-API chunk (a few KB). Reads are on demand, streamed in chunks for huge documents, and never block painting; a test keeps a 1,000-page docx outline under 50 ms.",
+   "dod": [
+    "<nitro-docx>.getContent() returns { schema: 1, format, title, outline[], blocks[] } with paragraphs (text, style, list level), tables (rows of cell text) and images (alt text); outline entries point at block ids.",
+    "<nitro-xlsx>.getRange('Sheet!A1:F200', { formulas, formats }) returns values, formulas and number formats for any range on any sheet (not only the selection); getContent() lists sheets with used ranges; large reads are chunked with a truncated flag.",
+    "<nitro-pptx>.getContent() returns slides with title, shape text in reading order (shape ids) and speaker notes.",
+    "Reads never change selection, focus, scroll position or dirty state; ids line up with getSelection, setPosition and setHighlights (#620); React exposes the same methods on the handle.",
+    "TypeScript types and a README section with an agent example; contract tests on python-docx / openpyxl / python-pptx fixtures; bundle-budget and all required checks green."
+   ],
+   "issue": 630
+  },
+  {
+   "id": "xlsx-row-col-size",
+   "app": "Excel",
+   "added": "2026-11-25",
+   "status": "New",
+   "headline": "Resize, AutoFit and hide rows and columns by dragging header borders, like Excel",
+   "today_img": "img/xlsx-rc-today.png",
+   "today_caption": "Today (dragging the border between column A and B to the right): nothing happens. The cursor never becomes a resize arrow, no width tip appears and the column stays the same, so long labels stay cut off. There is no Format menu for Row Height, Column Width or Hide & Unhide.",
+   "mock_img": "img/xlsx-rc-mock.png",
+   "mock_caption": "Mockup: dragging column A's border shows Excel's resize cursor, a dashed guide and a live 'Width: 22.14 (160 pixels)' tip; double-click AutoFits. A Format button in Home › Cells opens Row Height…, Column Width…, AutoFit and Hide & Unhide (Ctrl+9 / Ctrl+0).",
+   "today_detail_img": "img/xlsx-rc-today-detail.png",
+   "detail_img": "img/xlsx-rc-mock-detail.png",
+   "thumb_img": "img/xlsx-rc-thumb.png",
+   "why": "Widening a column so a label or number fits is one of the most common things anyone does in a spreadsheet, and today a value like '########' or a cut-off label cannot be fixed at all. Excel, Google Sheets, OnlyOffice and Collabora all resize on a header-border drag and AutoFit on double-click. Nitro's engine already has row height, column width and hide/unhide edits (ported in #67), so this is mostly pointer handling and the Format menu.",
+   "effort": "S",
+   "effort_note": "2–3 days (resize hit zone on header borders with cursor, guide and size tip; drag applies to all selected rows/columns; double-click AutoFit using the existing text measurer; Format menu in Cells: Row Height…, AutoFit Row Height, Column Width…, AutoFit Column Width, Default Width…, Hide & Unhide; Ctrl+9 / Ctrl+0 / Ctrl+Shift+9; hidden marker in headers; one undo step each). The right-click entries in #557 call these same commands.",
+   "risk": "Low. Writes standard <col width customWidth hidden> and <row ht customHeight hidden>, which the engine already models; untouched columns must round-trip unchanged. Frozen panes and merged cells need to repaint correctly after a resize. Cells gains one large button and stays two rows; Font and Alignment groups are unchanged.",
+   "perf": "No first-load change: a few KB in the lazily loaded Excel editor chunk. Dragging shows a guide only and re-lays out the grid once on release, as Excel does; AutoFit measures only the column's used cells (batched, one measure pass).",
+   "dod": [
+    "Hovering a row or column header border shows a resize cursor; dragging shows a guide and a live size tip in Excel units and pixels, and applies on release to every selected row or column, as one undo step.",
+    "Double-clicking a border AutoFits to the widest/tallest content (multi-selection too); Home › Cells › Format has Row Height…, AutoFit Row Height, Column Width…, AutoFit Column Width, Default Width… and Hide & Unhide.",
+    "Hidden rows and columns are skipped in the grid with a visible marker in the headers; Ctrl+9, Ctrl+0 and Ctrl+Shift+9 work, and selecting across a hidden range then Unhide shows it again.",
+    "Saved files keep sizes and hidden state as standard <col>/<row> attributes and reopen in Excel and LibreOffice identically; files opened with hidden or custom-sized columns display them correctly.",
+    "Playwright tests cover drag, double-click AutoFit, the Format menu, hide/unhide shortcuts, undo and save round-trip; Cells stays two rows; bundle-budget and all required checks green."
+   ],
+   "issue": 629
+  },
+  {
+   "id": "docx-track-changes",
+   "app": "Word",
+   "added": "2026-11-25",
+   "status": "New",
+   "headline": "Review tab with Track Changes: see redlines, then accept or reject them one by one",
+   "today_img": "img/docx-tc-today.png",
+   "today_caption": "Today (a sample term sheet with 11 tracked changes by two reviewers, opened in the live demo): Nitro paints deleted and inserted text run together with no markup, so the facility reads \"USD 250,000,000USD 300,000,000\" and the term \"threefive years\". There is no Review tab, so changes cannot be seen, accepted or rejected.",
+   "mock_img": "img/docx-tc-mock.png",
+   "mock_caption": "Mockup: a Review tab (Tracking: Track Changes on, All Markup, Reviewing Pane; Changes: Accept, Reject, Previous, Next). Deletions are struck through and insertions underlined in each reviewer's colour, with change bars in the margin, a revisions list with Accept / Reject, and 'Track Changes: On' in the status bar.",
+   "today_detail_img": "img/docx-tc-today-detail.png",
+   "detail_img": "img/docx-tc-mock-detail.png",
+   "thumb_img": "img/docx-tc-thumb.png",
+   "why": "Redlined drafts are how contracts, term sheets and policies move between people, and today Nitro shows them wrongly: the old and the new text appear side by side as if both were current, which is worse than not opening the file. Word, Google Docs (Suggesting), OnlyOffice and Collabora all show markup and accept/reject. Nitro's Word engine already models w:ins / w:del and has accept and reject (ported in #82), so this is mainly painting the markup and adding the Review tab.",
+   "effort": "M",
+   "effort_note": "3–5 days (paint insertions/deletions/format changes in author colours with change bars; All Markup / Simple Markup / No Markup / Original views; Review tab with Track Changes toggle, Accept / Reject (this, all shown, all), Previous / Next; revisions pane; typing while tracking writes w:ins/w:del with author and date from a host-set user name). Comments (declined in #578) stay out of scope.",
+   "risk": "Medium. Markup changes layout (struck text still takes space), so pagination must use the same view the user picked. Accept/reject must write the same XML Word does and keep untouched revisions byte-identical. The Review tab is a new tab; the Home tab, including Font and Paragraph at two rows, is unchanged.",
+   "perf": "No first-load change: Review tab and pane are a lazy chunk (a few KB). Painting markup reuses the existing run painter with extra decoration; documents without revisions pay nothing. A 200-page document with 1,000 revisions must still open within today's budget.",
+   "dod": [
+    "Documents with tracked changes show insertions underlined and deletions struck through in per-author colours with change bars; No Markup and Original show the final and original text correctly (never both run together).",
+    "A Review tab has Track Changes (toggle), All Markup / Simple Markup / No Markup / Original, Reviewing Pane, Accept and Reject (this change, all shown, all) and Previous / Next; each accept/reject is one undo step.",
+    "With Track Changes on, typing and deleting write w:ins / w:del with the author (host-settable, e.g. a user attribute or React prop) and the date; the status bar shows Track Changes: On.",
+    "Saved files open in Word and LibreOffice with the same revisions; accepted/rejected results match Word's; untouched revisions round-trip byte-identical.",
+    "Playwright tests cover rendering, each view, accept/reject one and all, tracked typing and save round-trip; Home ribbon unchanged (Font and Paragraph two rows); bundle-budget and all required checks green."
+   ],
+   "issue": 628
+  },
   {
    "id": "strategic-xlsx-stream",
    "tags": [
@@ -359,7 +444,7 @@
    "id": "xlsx-selection",
    "app": "Excel",
    "added": "2026-11-23",
-   "status": "Approved",
+   "status": "Building",
    "headline": "Range selection that keeps up with your mouse, like Excel",
    "today_img": "img/xlsx-select-today.png",
    "today_caption": "Today (B12:E19 dragged): the range gets an outline but no shading. Clicking a column or row header does not select it, dragging past the bottom edge does not auto-scroll, and there is no size tip or Ctrl+click second range.",
@@ -381,7 +466,7 @@
     "A size tip (for example 8R × 4C) follows the pointer while dragging; Font, Alignment and Number groups stay at two rows; bundle-budget and all required checks green."
    ],
    "issue": 612,
-   "status_note": "Approved 2026-11-23 (👍). Work started 2026-11-24 at 4 PM in the agy lane (branch agy/612-range-select); no PR yet."
+   "status_note": "Building: draft PR #625 open (agy lane, branch agy/612-range-select, opened 2026-11-24 4:28 PM ET); awaits HoP review."
   },
   {
    "id": "xlsx-autosum",
@@ -491,7 +576,7 @@
     "Playwright tests cover open/close, click-to-jump, keyboard, empty state and focused search; Font and Paragraph stay at two rows; bundle-budget and all required checks green."
    ],
    "issue": 607,
-   "status_note": "Approved 2026-11-22 (👍); label applied 2026-11-23. Queued for the nightly build."
+   "status_note": "Approved 2026-11-22 (👍). The 2026-11-25 nightly attempt stalled with no code and was stopped by its watchdog at 5:41 AM ET; no branch or PR, so it's back in the queue."
   },
   {
    "id": "pptx-slide-sorter",
