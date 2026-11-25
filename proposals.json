@@ -5,6 +5,10 @@
  "editions": [
   {
    "date": "2026-11-25",
+   "note": "Afternoon edition, three more Strategic bets. (1) A lean viewer core per format, so a read-only preview stops downloading Word, PowerPoint, the editor and 481 formula functions before its first paint. (2) Accessibility leadership: zero WCAG 2.2 AA violations in all three apps, a spreadsheet grid screen readers understand, and a published conformance report. Today's demo scan finds 47 critical issues in Excel. (3) A stable 1.0 embedding SDK with no document server, typed commands and events, docs and adapters beyond React. Issues #632–#634. We considered moving rendering off the main thread and dropped it: loading a 1-million-cell sheet in the demo showed no long main-thread tasks. #607 Navigation pane is building again."
+  },
+  {
+   "date": "2026-11-25",
    "note": "Ninth edition: Word Review tab with Track Changes (today a redlined file shows old and new text run together), Excel row/column resize, AutoFit and Hide & Unhide, and a host API to read the document as data (outline, paragraphs, tables, any cell range, slide text) for agents. #612 range selection is building in draft PR #625. #607 is back to Approved: the overnight attempt stalled with no code."
   },
   {
@@ -45,6 +49,229 @@
   }
  ],
  "proposals": [
+  {
+   "id": "strategic-lean-boot",
+   "tags": [
+    "Strategic"
+   ],
+   "app": "All apps · Developers",
+   "added": "2026-11-25",
+   "status": "New",
+   "headline": "Show the first screen before the whole engine arrives: a lean viewer core per format, with editing and the other formats loaded only when needed",
+   "today_label": "TODAY · measured on main and the public demo",
+   "today_img": "img/strategic-lean-boot-today.png",
+   "today_caption": "Today every page downloads and compiles one 8.3 MB WebAssembly file (2.9 MB over the wire) that holds all three apps, the editor and the formula engine, even to preview a 1,000-cell sheet. A 1,000-cell sheet and a 1-million-cell sheet paint within 36 ms of each other, so engine start-up is most of the wait.",
+   "mock_img": "img/strategic-lean-boot-mock.png",
+   "mock_caption": "Mockup: a read-only Excel preview fetches only the Excel viewer core and paints. Editing, the formula engine and the Word/PowerPoint code arrive in the background or on first use, and hosts can warm them ahead of time.",
+   "today_detail_img": "img/strategic-lean-boot-today-detail.png",
+   "detail_img": "img/strategic-lean-boot-mock-detail.png",
+   "thumb_img": "img/strategic-lean-boot-thumb.png",
+   "why": "Nitro's parser is no longer the slow part. In the browser test, a 1,000-cell workbook paints in 230 ms and a 1-million-cell workbook in 266 ms. The fixed cost of starting the engine dominates, and that cost is one 8.3 MB WebAssembly binary with every format and every editing feature in it. A preview pane that only shows Excel files still pays for Word layout, PowerPoint, the editor and 481 formula functions on first open. Splitting the engine so each preview loads only what it shows makes the first visit faster for every file, of every size. It complements #622, which cuts the bytes of the document; this bet cuts the bytes of the engine.",
+   "wins": "Embedding developers first: preview panes in React apps like the one Jared's company runs over AWS EFS, where most opens are read-only and many are first visits or arrive after the browser cache was cleared. Then every user on a slow or metered connection. Hosts that only embed one format stop shipping the other two.",
+   "phases": [
+    {
+     "name": "M1 · Size profile and per-format builds (about 1 week)",
+     "ships": "A CI size report that breaks the WASM down by crate and feature, plus three build targets (Excel, Word and PowerPoint viewers) from the same source with Cargo features. Hosts can already point a format-only element at its own binary."
+    },
+    {
+     "name": "M2 · Viewer core, editor on demand (1–2 weeks)",
+     "ships": "Read-only open loads a viewer-only binary. Editing, the formula engine and dialogs load as a second module the first time the user edits, with no visible change to the editing UI. Cached values are shown until the formula engine arrives."
+    },
+    {
+     "name": "M3 · Warm-up API and loading hints (3–5 days)",
+     "ships": "nitroPreload('xlsx') and a React usePreload() hook let a host fetch and compile the right core while the user browses a file list. The demo and docs show modulepreload and Cache-Control recipes for S3/CloudFront."
+    },
+    {
+     "name": "M4 · Budgets that hold (2–3 days)",
+     "ships": "Per-binary size budgets in CI next to the 17,408 B eager-loader budget, and a first-visit row in docs/perf on a throttled network."
+    }
+   ],
+   "evidence": [
+    {
+     "text": "Browser first paint (median, localhost, fresh browser): Excel 1k cells 230.0 ms, 100k cells 244.1 ms, 1M cells 266.1 ms. Word 10 pages 230.5 ms. PowerPoint 10 slides 255.0 ms.",
+     "source": "docs/perf/browser-e2e.json (PR #556), main 028ebf9"
+    },
+    {
+     "text": "The npm package ships one binary, pkg/nitro_xml_wasm_bg.wasm: 8,320,060 B raw, 1,924,802 B with brotli (quality 11).",
+     "source": "nitro-xml 0.2.0 tarball from npm, measured 2026-11-25"
+    },
+    {
+     "text": "The public Excel demo transferred that binary as 2,887,217 B (gzip) on every format's page. The first load showed a 117 ms main-thread long task during boot.",
+     "source": "Resource Timing and a long-task observer on jgridifier.github.io/nitro-xml/demo, headless Chromium, 2026-11-25 (one run)"
+    },
+    {
+     "text": "The loader already uses compileStreaming and keeps the binary in Cache Storage, so repeat visits skip the download. First visits and evicted caches pay the full size.",
+     "source": "packages/nitro-xml/loader/bootstrap.js, main 028ebf9"
+    },
+    {
+     "text": "Formula coverage is 481 of 481 catalog functions, all compiled into the same binary that read-only previews load.",
+     "source": "docs/formula-coverage.md"
+    },
+    {
+     "text": "Open signal: #532 (844 kB emf-converter chunk in consumer builds) shows bundle weight already reaching host apps.",
+     "source": "issue #532"
+    }
+   ],
+   "effort": "L",
+   "effort_note": "Multi-week: about 3–5 weeks over 4 milestones, each shippable alone",
+   "risk": "Medium. wasm-bindgen has no built-in code splitting, so M2 either links two modules that share memory or ships a viewer binary plus a full binary that replaces it on first edit. M1's size profile decides which. Per-format builds add CI time. The win depends on how much of the binary is editor and formula code, which is not measured yet; M1 measures it before M2 starts.",
+   "perf": "Goal: fewer engine bytes before first paint for read-only opens, and lower first paint on small files. Targets get set from M1's size profile, not guessed. The eager loader must stay under 17,408 B brotli (17,159 B today per PR #631). The new code only chooses which binary URL to fetch. Editing must not get slower once its module is loaded.",
+   "dod": [
+    "CI publishes a per-crate size report for each WASM binary and fails on budget overruns.",
+    "A read-only Excel open fetches only the Excel viewer binary. A CI test asserts that no editor or Word/PowerPoint module is requested before first paint.",
+    "The first edit loads the editor module and works identically. The existing interaction and editor suites pass unchanged.",
+    "nitroPreload() and React usePreload() are documented, with an S3/CloudFront caching recipe.",
+    "docs/perf gains a first-visit, throttled-network row for 1k-cell xlsx, 10-page docx and 10-slide pptx, before and after. Eager loader under 17,408 B. All required checks green."
+   ],
+   "status_note": "New strategic bet (2026-11-25). Complements #622 (document bytes) by cutting engine bytes.",
+   "issue": 632
+  },
+  {
+   "id": "strategic-a11y",
+   "tags": [
+    "Strategic"
+   ],
+   "app": "Word · Excel · PowerPoint",
+   "added": "2026-11-25",
+   "status": "New",
+   "headline": "Accessibility you can put on a procurement form: WCAG 2.2 AA in all three apps, a spreadsheet grid screen readers understand, and a published conformance report",
+   "today_label": "TODAY · axe-core scan of the public demo",
+   "today_img": "img/strategic-a11y-today.png",
+   "today_caption": "Today an axe-core WCAG 2.2 AA scan of the demo finds 47 critical and 5 serious problems in Excel, 1 serious in Word and none in PowerPoint. The Excel grid's row and column headers sit outside any row, so a screen reader can't reliably say \"B3, Revenue\" as you move.",
+   "mock_img": "img/strategic-a11y-mock.png",
+   "mock_caption": "Mockup: every cell announces its column header, row and value; the ribbon and the document are reachable by keyboard alone; a CI gate holds zero WCAG 2.2 AA violations; and a public conformance report links from the README.",
+   "today_detail_img": "img/strategic-a11y-today-detail.png",
+   "detail_img": "img/strategic-a11y-mock-detail.png",
+   "thumb_img": "img/strategic-a11y-thumb.png",
+   "why": "Big companies, governments and universities can't buy or embed a document viewer without accessibility paperwork: Section 508 in the US, EN 301 549 and the European Accessibility Act in Europe. Microsoft and Google publish conformance reports for their web apps; Google's public reports for Docs, Sheets and Slides cover WCAG 2.1. Nitro's gate today only checks that it is no worse than the TypeScript project it was ported from (#42 is still open), and the Excel grid fails basic ARIA structure. Being the embeddable Office engine with a clean WCAG 2.2 AA record and a public report turns accessibility from a blocker into a reason to choose Nitro.",
+   "wins": "Embedding developers in regulated companies first: their app can't ship to employees or customers until the component passes an accessibility review, and every finding is theirs to fix. Then users who rely on screen readers, keyboard-only use or zoom, in all three apps.",
+   "phases": [
+    {
+     "name": "M1 · Zero violations, gated in CI (about 1 week)",
+     "ships": "Fix today's findings: a valid grid structure (headers inside rows, aria-rowindex/colindex on cells), ribbon accessible names that include the visible label, a 24 px Zoom slider target, and a focusable Word page area. Turn #42's differential gate into an absolute one: zero serious or critical WCAG 2.2 AA violations on every fixture."
+    },
+    {
+     "name": "M2 · Screen-reader-native Excel grid (1–2 weeks)",
+     "ships": "Moving the active cell announces column header, row header and value (or the formula, on request) through the grid's own semantics, with no extra live-region spam. Selection size, merged cells and frozen panes are announced. Scripted NVDA and VoiceOver checks per docs/a11y-manual.md."
+    },
+    {
+     "name": "M3 · Keyboard and reading order in Word and PowerPoint (1–2 weeks)",
+     "ships": "F6 cycles ribbon, document and status bar; Alt key-tips reach every ribbon command; Word headings, lists and tables, and PowerPoint slide titles and alt text, come through in reading order. Focus is always visible (WCAG 2.2 focus-appearance and target-size checks)."
+    },
+    {
+     "name": "M4 · Published conformance report (3–5 days)",
+     "ships": "A VPAT-format conformance report for WCAG 2.2 AA in docs/, regenerated each release from the CI results plus a manual pass, linked from the README and the npm page."
+    }
+   ],
+   "evidence": [
+    {
+     "text": "axe-core 4.14 (WCAG 2.0/2.1/2.2 A and AA rules) on the demo: Excel 47 critical (46 headers with no row parent, 1 grid with invalid children) and 5 serious (4 ribbon names that don't match their labels, 1 Zoom slider at 112×16 px). Word: 1 serious (scrollable page area not keyboard-focusable). PowerPoint: 0.",
+     "source": "axe-core run on jgridifier.github.io/nitro-xml/demo/{xlsx,docx,pptx}-full.html, headless Chromium, 2026-11-25"
+    },
+    {
+     "text": "The a11y CI gate is differential: it allows anything the upstream TypeScript project also does (\"zero new serious/critical vs upstream TS\"). Issue #42, whose acceptance criteria require zero serious or critical violations, is still open.",
+     "source": "scripts/ci/a11y.sh and tests/a11y/allowlist.mjs, main 028ebf9; issue #42"
+    },
+    {
+     "text": "main has no branch protection, so the a11y job is not a required check.",
+     "source": "GitHub API, branches/main/protection, 2026-11-25"
+    },
+    {
+     "text": "Microsoft publishes Accessibility Conformance Reports for its products against WCAG, Section 508 and EN 301 549.",
+     "source": "microsoft.com/accessibility/conformance-reports"
+    },
+    {
+     "text": "Google's published reports for Docs (April 2023), Sheets (October 2023) and Slides (August 2023) cover WCAG 2.1 A and AA, Section 508 and EN 301 549, with some \"Partially Supports\" findings.",
+     "source": "Google Accessibility Conformance Reports, google.com/accessibility/customers-partners"
+    }
+   ],
+   "effort": "L",
+   "effort_note": "Multi-week: about 4–6 weeks over 4 milestones, each shippable alone",
+   "risk": "Medium. The grid paints only visible rows, so ARIA must describe a 1,048,576-row sheet with aria-rowcount and aria-rowindex rather than real DOM rows, and screen readers differ in how they handle virtualized grids. Fixing the grid structure touches the WASM painter output, so the visual parity suites must stay green. A conformance report is a public claim, so the manual pass needs care.",
+   "perf": "No new eager code: ARIA attributes come from the WASM painter, and key-tips and announcements go in lazy ribbon chunks. Eager loader stays under 17,408 B brotli. Scroll and selection paint budgets (≤16 ms in #612) must not regress from extra attributes, which CI checks.",
+   "dod": [
+    "axe-core reports zero serious or critical WCAG 2.2 AA violations on every a11y fixture in all three apps, and scripts/ci/a11y.sh fails on any (no upstream allowance).",
+    "In the Excel grid, NVDA and VoiceOver announce column header, row and value on every arrow key, including merged cells and frozen panes (scripted checks plus a recorded manual pass).",
+    "Every ribbon command and the document area in all three apps is reachable and operable by keyboard alone, with visible focus.",
+    "docs/ has a WCAG 2.2 AA conformance report (VPAT format), linked from the README, refreshed each release.",
+    "Eager loader under 17,408 B. Visual parity and interaction suites unchanged. All required checks green."
+   ],
+   "status_note": "New strategic bet (2026-11-25). Finishes and goes beyond #42 (open).",
+   "issue": 633
+  },
+  {
+   "id": "strategic-embed-sdk",
+   "tags": [
+    "Strategic"
+   ],
+   "app": "Developers · all apps",
+   "added": "2026-11-25",
+   "status": "New",
+   "headline": "Embed Office documents in ten minutes with no document server: a stable 1.0 host SDK with typed commands and events, real docs, and adapters beyond React",
+   "today_label": "TODAY · from the repo and open issues",
+   "today_img": "img/strategic-embed-sdk-today.png",
+   "today_caption": "Today Nitro runs fully in the browser, which no server-based rival does, but embedding it still trips on rough edges: the README React example shows a blank area (#598), full mode renders unstyled in host apps (#603), every save is named workbook.xlsx (#600), and edit commands are untyped strings (#531). The API is 0.x, with 11 host-api issues open.",
+   "mock_img": "img/strategic-embed-sdk-mock.png",
+   "mock_caption": "Mockup: a docs site with a ten-minute quickstart per framework, typed applyEdit commands and events with autocomplete, and a 1.0 promise: no breaking change without a major version, checked by CI.",
+   "today_detail_img": "img/strategic-embed-sdk-today-detail.png",
+   "detail_img": "img/strategic-embed-sdk-mock-detail.png",
+   "thumb_img": "img/strategic-embed-sdk-thumb.png",
+   "why": "The other open embeddable office suites need servers. ONLYOFFICE's editor loads its API script from your own ONLYOFFICE Document Server. Collabora Online runs in an iframe from a Collabora server that talks to your storage over WOPI. Nitro is an npm package that opens, edits and saves entirely in the browser. That is a real moat, but only if embedding is boring: copy the quickstart, it works, it stays working on upgrade. Today the host API grows feature by feature (#561–#575, #590, #614, #620, #630) while the basics in the README still break. This bet makes the host contract a product: typed, documented, versioned and tested from a fresh app on every PR.",
+   "wins": "Embedding developers, Jared's company included: a React preview app over AWS EFS should be a quickstart, not a debugging session, and upgrades should be safe. It also wins teams that can't run a document server for cost, security or air-gap reasons. Users win indirectly: fewer broken embeds.",
+   "phases": [
+    {
+     "name": "M1 · Ten-minute quickstarts that work (about 1 week)",
+     "ships": "Fix the embed blockers (#598, #603, #600, #529, #532). CI builds the README's vanilla, React and Next.js examples in fresh Vite and Next apps from the packed tarball and checks that they render all three formats and save with the right name."
+    },
+    {
+     "name": "M2 · Typed commands and events (1–2 weeks)",
+     "ships": "applyEdit commands and nitro-* events become typed unions in index.d.ts with autocomplete. Unknown commands list the valid ones (#531). An API reference is generated from the types into the docs site, with a cookbook (read-only preview, dirty tracking, custom ribbon, highlights)."
+    },
+    {
+     "name": "M3 · 1.0 contract (about 1 week)",
+     "ships": "An API report checked in and diffed by CI, so any breaking change fails without a major bump. A written deprecation policy, the stable data-testid contract (#574), and a CHANGELOG section per public API change."
+    },
+    {
+     "name": "M4 · Adapters beyond React (1 week)",
+     "ships": "Thin Vue, Angular and Svelte wrappers over the web component (props, events, ref methods), each with a quickstart that runs in CI. This reverses the README's \"framework bindings beyond React: out for now\" line."
+    }
+   ],
+   "evidence": [
+    {
+     "text": "Embed-blocking DX issues still open after the v0.2.0 consumer test: #598 (README React example renders a blank area), #603 (full mode unstyled, handle untyped, onChange not fired on save), #600 (every save named workbook.xlsx), #531 (applyEdit commands undocumented and stringly typed), #529 (deprecation warning on every load), #532 (844 kB chunk).",
+     "source": "GitHub issues, open on 2026-11-25; BACKLOG.md developer pass on 2026-11-23"
+    },
+    {
+     "text": "Host API demand: 18 issues labelled host-api (7 closed, 11 open), plus proposals #590, #614, #620 and #630.",
+     "source": "GitHub label host-api, 2026-11-25"
+    },
+    {
+     "text": "The README lists \"Framework bindings beyond React, the web component and the headless API\" as out of scope for now. The package is at 0.2.0.",
+     "source": "README.md, main 028ebf9; npm nitro-xml 0.2.0"
+    },
+    {
+     "text": "ONLYOFFICE Docs: DocsAPI.DocEditor is loaded from https://documentserver/web-apps/apps/api/documents/api.js on your ONLYOFFICE Docs server.",
+     "source": "api.onlyoffice.com/docs/docs-api/usage-api/doceditor"
+    },
+    {
+     "text": "Collabora Online: the host serves an iframe from the Collabora server's /hosting/discovery URL and implements WOPI CheckFileInfo, GetFile and PutFile; Collabora recommends a dedicated server.",
+     "source": "Collabora Online SDK examples (github.com/CollaboraOnline/collabora-online-sdk-examples) and Collabora's WOPI integration guide"
+    }
+   ],
+   "effort": "L",
+   "effort_note": "Multi-week: about 4–5 weeks over 4 milestones, each shippable alone",
+   "risk": "Low to medium. Most of the work is fixing and testing, not new engine code. The risk is freezing an API too early: M3's 1.0 contract should wait until #590, #614, #620 and #630 land or are designed. Adapters add packages to maintain, so they stay thin over the web component.",
+   "perf": "No runtime cost: types, docs and CI add nothing to the bundle. Adapters are separate packages that import the existing web component. Eager loader stays under 17,408 B brotli. The fresh-app CI also records consumer bundle size, so a regression like #532 is caught.",
+   "dod": [
+    "The README vanilla, React and Next.js quickstarts build from the packed tarball in CI and render a docx, an xlsx and a pptx. Saving keeps the opened file name.",
+    "Every applyEdit command and nitro-* event is typed in index.d.ts. Unknown commands list the valid ones. The generated API reference and cookbook are live on the docs site.",
+    "A checked-in API report fails CI on breaking changes without a major version. Deprecation policy and data-testid contract (#574) are published.",
+    "Vue, Angular and Svelte adapters each pass a fresh-app CI test.",
+    "#598, #600, #603, #529, #531 and #532 closed. Eager loader under 17,408 B. All required checks green."
+   ],
+   "status_note": "New strategic bet (2026-11-25). Absorbs embed DX issues #598, #600, #603, #529, #531, #532 and #574.",
+   "issue": 634
+  },
   {
    "id": "host-read-content",
    "app": "Developers · all apps",
@@ -554,7 +781,7 @@
    "id": "docx-navigation",
    "app": "Word",
    "added": "2026-11-22",
-   "status": "Approved",
+   "status": "Building",
    "headline": "Jump to any heading from a Navigation pane",
    "today_img": "img/docx-nav-today.png",
    "today_caption": "Today: View has only Zoom and Diagnostics. Headings are in the page, but there is no list of them, so you scroll to find a section. Ctrl+F opens a find box that does not even focus the search field.",
@@ -576,7 +803,7 @@
     "Playwright tests cover open/close, click-to-jump, keyboard, empty state and focused search; Font and Paragraph stay at two rows; bundle-budget and all required checks green."
    ],
    "issue": 607,
-   "status_note": "Approved 2026-11-22 (👍). The 2026-11-25 nightly attempt stalled with no code and was stopped by its watchdog at 5:41 AM ET; no branch or PR, so it's back in the queue."
+   "status_note": "Building again since 2:13 PM ET 11-25 (Claude, branch feat/607-docx-navigation). The session hit its usage limit at 2:59 PM ET with work not yet committed; it resumes after the 7:10 PM ET reset. No PR yet."
   },
   {
    "id": "pptx-slide-sorter",
